@@ -14,14 +14,17 @@ __global__ void process(const cv::cuda::PtrStep<uchar3> src, cv::cuda::PtrStep<u
     const int dst_y = blockDim.y * blockIdx.y + threadIdx.y;
 
     uint3 sum = {0,0,0};
-    for (int j=-kernelSize/2; j<kernelSize/2+kernelSize%1+1; j++) {
-        for (int i=-kernelSize/2; i<kernelSize/2+kernelSize%2+1; i++) {
-            // if (dst_x < cols && dst_y < rows) {
-            uchar3 val = src(dst_y+j, dst_x+i);
+    for (int j=-kernelSize/2; j<kernelSize/2+kernelSize%2; j++) {
+        for (int i=-kernelSize/2; i<kernelSize/2+kernelSize%2; i++) {
+            char2 coord = {dst_x+i, dst_y+j};
+            if (coord.x < 0) coord.x = 0;
+            if (coord.y < 0) coord.y = 0;
+            if (coord.x >= cols) coord.x = cols-1;
+            if (coord.y >= rows) coord.y = rows-1;
+            uchar3 val = src(coord.y, coord.x);
             sum.x += val.x;
             sum.y += val.y;
             sum.z += val.z;
-            // }
         }
     }
     sum.x /= kernelSize * kernelSize;
