@@ -14,10 +14,10 @@ __global__ void process(const cv::cuda::PtrStep<uchar3> src, cv::cuda::PtrStep<u
     const int dst_y = blockDim.y * blockIdx.y + threadIdx.y;
 
     uint3 sum = {0,0,0};
-    for (int j=-kernelSize; j<kernelSize; j++) {
-        for (int i=-kernelSize; i<kernelSize; i++) {
+    for (int j=-kernelSize/2; j<kernelSize/2+kernelSize%1+1; j++) {
+        for (int i=-kernelSize/2; i<kernelSize/2+kernelSize%2+1; i++) {
             // if (dst_x < cols && dst_y < rows) {
-            uchar3 val = src(j,i);
+            uchar3 val = src(dst_y+j, dst_x+i);
             sum.x += val.x;
             sum.y += val.y;
             sum.z += val.z;
@@ -41,5 +41,7 @@ void startCUDA (cv::cuda::GpuMat& src, cv::cuda::GpuMat& dst) {
     const dim3 block(32, 8);
     const dim3 grid(divUp(dst.cols, block.x), divUp(dst.rows, block.y));
 
-    process<<<grid, block>>>(src, dst, dst.rows, dst.cols, 1);
+    const int kernelSize = 5;
+
+    process<<<grid, block>>>(src, dst, dst.rows, dst.cols, kernelSize);
 }
