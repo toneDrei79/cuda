@@ -16,7 +16,7 @@ __global__ void process(const cv::cuda::PtrStep<uchar3> src, cv::cuda::PtrStep<u
     uint3 sum = {0,0,0};
     for (int j=-kernelSize/2; j<kernelSize/2+kernelSize%2; j++) {
         for (int i=-kernelSize/2; i<kernelSize/2+kernelSize%2; i++) {
-            char2 coord = {dst_x+i, dst_y+j};
+            int2 coord = {dst_x+i, dst_y+j};
             if (coord.x < 0) coord.x = 0;
             if (coord.y < 0) coord.y = 0;
             if (coord.x >= cols) coord.x = cols-1;
