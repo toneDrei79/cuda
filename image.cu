@@ -14,14 +14,23 @@ __global__ void process(const cv::cuda::PtrStep<uchar3> src, cv::cuda::PtrStep<u
     const int dst_y = blockDim.y * blockIdx.y + threadIdx.y;
 
     uint3 sum = {0,0,0};
-    if (dst_x < cols && dst_y < rows) {
-        uchar3 val = src(dst_y, dst_x);
-        sum[0] += val.x;
-        sum[1] += val.y;
-        sum[2] += val.z;
+    for (int j=-kernelSize; j<kernelSize; j++) {
+        for (int i=-kernelSize; i<kernelSize; i++) {
+            // if (dst_x < cols && dst_y < rows) {
+            uchar3 val = src(j,i);
+            sum.x += val.x;
+            sum.y += val.y;
+            sum.z += val.z;
+            // }
+        }
     }
-    sum /= kernelSize * kernelSize;
-    dst(dst_y, dst_x) = sum;
+    sum.x /= kernelSize * kernelSize;
+    sum.y /= kernelSize * kernelSize;
+    sum.z /= kernelSize * kernelSize;
+
+    dst(dst_y, dst_x).x = sum.x;
+    dst(dst_y, dst_x).y = sum.y;
+    dst(dst_y, dst_x).z = sum.z;
 }
 
 int divUp(int a, int b) {
@@ -32,5 +41,5 @@ void startCUDA (cv::cuda::GpuMat& src, cv::cuda::GpuMat& dst) {
     const dim3 block(32, 8);
     const dim3 grid(divUp(dst.cols, block.x), divUp(dst.rows, block.y));
 
-    process<<<grid, block>>>(src, dst, dst.rows, dst.cols, 3);
+    process<<<grid, block>>>(src, dst, dst.rows, dst.cols, 1);
 }
