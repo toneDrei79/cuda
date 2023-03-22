@@ -9,31 +9,28 @@
 
 #include "helper_math.h"
 
-__global__ void process(const cv::cuda::PtrStep<uchar3> src, cv::cuda::PtrStep<uchar3> dst, int rows, int cols )
-{
- 
-  const int dst_x = blockDim.x * blockIdx.x + threadIdx.x;
-  const int dst_y = blockDim.y * blockIdx.y + threadIdx.y;
-  
-  if (dst_x < cols && dst_y < rows)
-    {
-      uchar3 val = src(dst_y, dst_x);
-      dst(dst_y, dst_x).x = 255-val.x;
-      dst(dst_y, dst_x).y = 255-val.y;
-      dst(dst_y, dst_x).z = 255-val.z;
-    }}
+__global__ void process(const cv::cuda::PtrStep<uchar3> src, cv::cuda::PtrStep<uchar3> dst, int rows, int cols, int kernelSize) {
+    const int dst_x = blockDim.x * blockIdx.x + threadIdx.x;
+    const int dst_y = blockDim.y * blockIdx.y + threadIdx.y;
 
-int divUp(int a, int b)
-{
-  return ((a % b) != 0) ? (a / b + 1) : (a / b);
+    uint3 sum = {0,0,0};
+    if (dst_x < cols && dst_y < rows) {
+        uchar3 val = src(dst_y, dst_x);
+        sum[0] += val.x;
+        sum[1] += val.y;
+        sum[2] += val.z;
+    }
+    sum /= kernelSize * kernelSize;
+    dst(dst_y, dst_x) = sum;
 }
 
-void startCUDA ( cv::cuda::GpuMat& src, cv::cuda::GpuMat& dst )
-{
-  const dim3 block(32, 8);
-  const dim3 grid(divUp(dst.cols, block.x), divUp(dst.rows, block.y));
-
-  process<<<grid, block>>>(src, dst, dst.rows, dst.cols);
-
+int divUp(int a, int b) {
+    return ((a % b) != 0) ? (a / b + 1) : (a / b);
 }
 
+void startCUDA (cv::cuda::GpuMat& src, cv::cuda::GpuMat& dst) {
+    const dim3 block(32, 8);
+    const dim3 grid(divUp(dst.cols, block.x), divUp(dst.rows, block.y));
+
+    process<<<grid, block>>>(src, dst, dst.rows, dst.cols, 3);
+}
