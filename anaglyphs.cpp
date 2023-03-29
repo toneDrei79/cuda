@@ -6,7 +6,7 @@ const float trueL[3][3] = {
     {0.   , 0.   , 0.   },
     {0.   , 0.   , 0.   }
 };
-const float trueL[3][3] = {
+const float trueR[3][3] = {
     {0.   , 0.   , 0.   },
     {0.   , 0.   , 0.   },
     {0.299, 0.587, 0.114}
@@ -17,7 +17,7 @@ const float grayL[3][3] = {
     {0.   , 0.   , 0.   },
     {0.   , 0.   , 0.   }
 };
-const float grayL[3][3] = {
+const float grayR[3][3] = {
     {0.   , 0.   , 0.   },
     {0.299, 0.587, 0.114},
     {0.299, 0.587, 0.114}
@@ -28,7 +28,7 @@ const float colorL[3][3] = {
     {0.   , 0.   , 0.   },
     {0.   , 0.   , 0.   }
 };
-const float colorL[3][3] = {
+const float colorR[3][3] = {
     {0.   , 0.   , 0.   },
     {0.   , 1.   , 0.   },
     {0.   , 0.   , 1.   }
@@ -39,18 +39,18 @@ const float halfcolorL[3][3] = {
     {0.   , 0.   , 0.   },
     {0.   , 0.   , 0.   }
 };
-const float halfcolorL[3][3] = {
+const float halfcolorR[3][3] = {
     {0.   , 0.   , 0.   },
     {0.   , 1.   , 0.   },
     {0.   , 0.   , 1.   }
 };
 
-const float halfcolorL[3][3] = {
+const float optimizedL[3][3] = {
     {0.   , 0.7  , 0.3  },
     {0.   , 0.   , 0.   },
     {0.   , 0.   , 0.   }
 };
-const float halfcolorL[3][3] = {
+const float optimizedR[3][3] = {
     {0.   , 0.   , 0.   },
     {0.   , 1.   , 0.   },
     {0.   , 0.   , 1.   }
