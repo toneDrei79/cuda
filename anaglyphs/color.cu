@@ -7,7 +7,7 @@
 #include <opencv2/core/cuda/vec_traits.hpp>
 #include <opencv2/core/cuda/vec_math.hpp>
 
-#include "helper_math.h"
+#include "../helper_math.h"
 
 __global__ void process(const cv::cuda::PtrStep<uchar3> src, cv::cuda::PtrStep<uchar3> dst, int rows, int cols, int width) {
     const int dst_x = blockDim.x * blockIdx.x + threadIdx.x;
