@@ -1,17 +1,12 @@
 #pragma once
 
 
-extern const float trueL[3][3];
-extern const float trueR[3][3];
+void setTrueAnaglyphMats(float matL[3][3], float matR[3][3]);
 
-extern const float grayL[3][3];
-extern const float grayR[3][3];
+void setGrayAnaglyphMats(float matL[3][3], float matR[3][3]);
 
-extern const float colorL[3][3];
-extern const float colorR[3][3];
+void setColorAnaglyphMats(float matL[3][3], float matR[3][3]);
 
-extern const float halfcolorL[3][3];
-extern const float halfcolorR[3][3];
+void setHalfcolorAnaglyphMats(float matL[3][3], float matR[3][3]);
 
-extern const float optimizedL[3][3];
-extern const float optimizedR[3][3];
+void setOptimizedAnaglyphMats(float matL[3][3], float matR[3][3]);
