@@ -14,8 +14,8 @@ __global__ void process(const cv::cuda::PtrStep<uchar3> src, cv::cuda::PtrStep<u
     const int dst_y = blockDim.y * blockIdx.y + threadIdx.y;
 
     int2 coord = {dst_x, dst_y};
-    uchar3 left = src(coord.y, coord.x/2);
-    uchar3 right = src(coord.y, coord.x/2 + cols/2);
+    uchar3 left = src(coord.y, int(coord.x/2));
+    uchar3 right = src(coord.y, int(coord.x/2) + int(cols/2));
 
     dst(dst_y, dst_x).x = char(0.299*left.x + 0.587*left.y + 0.114*left.z);
     dst(dst_y, dst_x).y = right.y;
