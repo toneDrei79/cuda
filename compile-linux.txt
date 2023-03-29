@@ -1,3 +1,12 @@
 /usr/local/cuda/bin/nvcc image.cu `pkg-config opencv4 --cflags --libs` imagecpp-linux.cpp -o imagecuda
 
 /usr/local/cuda/bin/nvcc imagePDE.cu `pkg-config opencv4 --cflags --libs` imagecpp-linuxPDE.cpp -o imagePDEcuda
+
+
+
+/usr/local/cuda/bin/nvcc image.cu `pkg-config opencv4 --cflags --libs` imagecpp-linux.cpp -c -o obj/ex01_1.o
+g++ -c -o obj/cu01_1.o `pkg-config opencv4 --cflags --libs` cu01_1.cpp
+g++ -c -o obj/anaglyphs.o anaglyphs.cpp
+g++ -o app/anaglyph obj/cu01_1.o obj/anaglyphs.o
+
+/usr/local/cuda/bin/nvcc true.cu `pkg-config opencv4 --cflags --libs` cu01_1.cpp anaglyphs.cpp -o imcuda
