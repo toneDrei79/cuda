@@ -9,7 +9,7 @@
 
 #include "../helper_math.h"
 
-__global__ void process(const cv::cuda::PtrStep<uchar3> src, cv::cuda::PtrStep<uchar3> dst, int rows, int cols, int width) {
+__global__ void process(const cv::cuda::PtrStep<uchar3> src, cv::cuda::PtrStep<uchar3> dst, int rows, int cols) {
     const int dst_x = blockDim.x * blockIdx.x + threadIdx.x;
     const int dst_y = blockDim.y * blockIdx.y + threadIdx.y;
 
@@ -30,7 +30,5 @@ void startCUDA (cv::cuda::GpuMat& src, cv::cuda::GpuMat& dst) {
     const dim3 block(32, 8);
     const dim3 grid(divUp(dst.cols, block.x), divUp(dst.rows, block.y));
 
-    const int kernelSize = 5;
-
-    process<<<grid, block>>>(src, dst, dst.rows, dst.cols, kernelSize);
+    process<<<grid, block>>>(src, dst, dst.rows, dst.cols);
 }

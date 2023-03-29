@@ -5,7 +5,7 @@
 
 using namespace std;
 
-void startCUDA (cv::cuda::GpuMat& src,cv::cuda::GpuMat& dst);
+void startCUDA(cv::cuda::GpuMat& src, cv::cuda::GpuMat& dst);
 
 int main( int argc, char** argv ) {
     cv::namedWindow("Original Image", cv::WINDOW_OPENGL | cv::WINDOW_AUTOSIZE);
@@ -14,11 +14,11 @@ int main( int argc, char** argv ) {
     cv::Mat h_img = cv::imread(argv[1]);
     cv::Mat h_result;
 
-    cv::cuda::GpuMat d_img, d_result;
+    cv::cuda::GpuMat d_img, d_result(h_img.height, h_img.width/2, );
 
     d_img.upload(h_img);
-    d_result.upload(h_img);
-    int width= d_img.cols;
+    // d_result.upload(h_img);
+    int width = d_img.cols;
     int height = d_img.rows;
 
     cv::imshow("Original Image", h_img);
