@@ -39,9 +39,12 @@ void startCUDA(cv::cuda::GpuMat& src, cv::cuda::GpuMat& dst, float* mat_l, float
     size_t mat_size;
     mat_size = sizeof(float) * 9;
     cudaMalloc((void **)&dmat_l, mat_size);
-    cudaMemcpy(dmat_l, mat_l, mat_size, cudaMemcpyHostToDevice);
     cudaMalloc((void **)&dmat_r, mat_size);
+    cudaMemcpy(dmat_l, mat_l, mat_size, cudaMemcpyHostToDevice);
     cudaMemcpy(dmat_r, mat_r, mat_size, cudaMemcpyHostToDevice);
 
     process<<<grid, block>>>(src, dst, dst.rows, dst.cols, dmat_l, dmat_r);
+
+    cudaFree(dmat_l);
+    cudaFree(dmat_r);
 }
