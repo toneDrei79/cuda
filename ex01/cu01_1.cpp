@@ -8,7 +8,7 @@
 
 using namespace std;
 
-void startCUDA(cv::cuda::GpuMat& src, cv::cuda::GpuMat& dst);
+void startCUDA(cv::cuda::GpuMat& src, cv::cuda::GpuMat& dst, float* matL, float* matR);
 
 void setAnaglyphMats(int choice, float matL[3][3], float matR[3][3]);
 
@@ -36,7 +36,7 @@ int main(int argc, char** argv)
     const int iter = 100000;
     for (int i=0; i<iter ;i++)
     {
-        startCUDA(d_img, d_result);
+        startCUDA(d_img, d_result, &matL[0][0], &matR[0][0]);
     }
     auto end = std::chrono::high_resolution_clock::now();
     std::chrono::duration<double> diff = end - begin;

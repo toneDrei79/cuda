@@ -17,9 +17,18 @@ __global__ void process(const cv::cuda::PtrStep<uchar3> src, cv::cuda::PtrStep<u
     uchar3 left = src(coord.y, coord.x);
     uchar3 right = src(coord.y, coord.x + cols);
 
-    dst(dst_y, dst_x).x = uchar(0.299*left.x + 0.587*left.y + 0.114*left.z);
+    // printf("%d\n", matt);
+
+    dst(dst_y, dst_x).x = uchar(aaa*0.0*left.x + 0.587*left.y + 0.114*left.z);
     dst(dst_y, dst_x).y = 0;
     dst(dst_y, dst_x).z = uchar(0.299*right.x + 0.587*right.y + 0.114*right.z);
+
+    // dst(dst_y, dst_x).x = uchar(matL[0][0]*left.x  + matL[0][1]*left.y  + matL[0][2]*left.z
+    //                           + matR[0][0]*right.x + matR[0][1]*right.y + matR[0][2]*right.z);
+    // dst(dst_y, dst_x).y = uchar(matL[1][0]*left.x  + matL[1][1]*left.y  + matL[1][2]*left.z
+    //                           + matR[1][0]*right.x + matR[1][1]*right.y + matR[1][2]*right.z);
+    // dst(dst_y, dst_x).z = uchar(matL[2][0]*left.x  + matL[2][1]*left.y  + matL[2][2]*left.z
+    //                           + matR[2][0]*right.x + matR[2][1]*right.y + matR[2][2]*right.z);
 }
 
 int divUp(int a, int b) {
@@ -29,6 +38,9 @@ int divUp(int a, int b) {
 void startCUDA (cv::cuda::GpuMat& src, cv::cuda::GpuMat& dst) {
     const dim3 block(32, 8);
     const dim3 grid(divUp(dst.cols, block.x), divUp(dst.rows, block.y));
+
+    // float tmp[3] = {1., .5, .2};
+    // float tmpt = 0.299;
 
     process<<<grid, block>>>(src, dst, dst.rows, dst.cols);
 }
