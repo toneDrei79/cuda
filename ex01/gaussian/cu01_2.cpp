@@ -30,7 +30,7 @@ int main(int argc, char** argv)
     const int iter = std::stoi(argv[1]);
     for (int i=0; i<iter ;i++)
     {
-        startCUDA(d_img, d_result, kernel_size, sigma); // send the address of the first element of matrices
+        startCUDA(d_img, d_result, kernel_size, sigma);
     }
     auto end = std::chrono::high_resolution_clock::now();
     std::chrono::duration<double> diff = end - begin;

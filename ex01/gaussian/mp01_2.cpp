@@ -12,14 +12,17 @@ void gaussian_filtering(const cv::Mat& src, cv::Mat& dst, int rows, int cols, in
     float g_sum = 0;
     float b_sum = 0;
     float gauss_sum = 0;
+    // for each kernel pixel
     for (int j=-kernel_size/2; j<kernel_size/2+kernel_size%2; j++)
         for (int i=-kernel_size/2; i<kernel_size/2+kernel_size%2; i++)
         {
+            // get probability from gaussian equation
             float gauss_val = (1./(2.*PI*pow(sigma, 2.))) * exp(-(pow(i,2.)+pow(j,2.))/(2.*pow(sigma,2.)));
             gauss_sum += gauss_val;
 
             int idx_x = x + i;
             int idx_y = y + j;
+            // if idx is out of edge
             if (idx_x < 0) idx_x = 0;
             if (idx_y < 0) idx_y = 0;
             if (idx_x >= cols) idx_x = cols - 1;
@@ -53,6 +56,7 @@ int main(int argc, char** argv)
     for (int i=0; i<iter ;i++)
     {
         #pragma omp parallel for 
+            // for each pixel
             for (int j=0; j<h_result.rows; j++)
                 for (int i=0; i<h_result.cols; i++)
                 {

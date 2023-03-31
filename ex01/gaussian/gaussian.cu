@@ -19,13 +19,16 @@ __global__ void process(const cv::cuda::PtrStep<uchar3> src, cv::cuda::PtrStep<u
 
     float3 rgb_sum = {0, 0, 0};
     float gauss_sum = 0;
+    // for each kernel pixel
     for (int j=-kernel_size/2; j<kernel_size/2+kernel_size%2; j++)
         for (int i=-kernel_size/2; i<kernel_size/2+kernel_size%2; i++)
         {
+            // get probability from gaussian equation
             float gauss_val = (1./(2.*PI*pow(sigma, 2.))) * exp(-(pow(i,2.)+pow(j,2.))/(2.*pow(sigma,2.)));
             gauss_sum += gauss_val;
 
             int2 coord = {dst_x+i, dst_y+j};
+            // if coord is out of edge
             if (coord.x < 0)  coord.x = 0;
             if (coord.y < 0) coord.y = 0;
             if (coord.x >= cols) coord.x = cols - 1;
@@ -46,7 +49,6 @@ int divUp(int a, int b)
     return ((a % b) != 0) ? (a / b + 1) : (a / b);
 }
 
-// receive matrices as 1-dim pointer
 void startCUDA(cv::cuda::GpuMat& src, cv::cuda::GpuMat& dst, int kernel_size, int sigma)
 {
     const dim3 block(32, 8);
