@@ -3,8 +3,6 @@
 #include <opencv2/cudawarping.hpp>
 #include <chrono>  // for high_resolution_clock
 
-#include "anaglyph_mats.h"
-
 
 using namespace std;
 
@@ -26,6 +24,7 @@ int main(int argc, char** argv)
     cv::imshow("Original Image", h_img);
 
     int kernel_size = std::stoi(argv[2]);
+    float sigma = std::stof(argv[3]);
 
     auto begin = chrono::high_resolution_clock::now();
     const int iter = 10000;

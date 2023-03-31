@@ -40,16 +40,16 @@ int main(int argc, char** argv)
     cv::namedWindow("Original Image", cv::WINDOW_OPENGL | cv::WINDOW_AUTOSIZE);
     cv::namedWindow("Processed Image", cv::WINDOW_OPENGL | cv::WINDOW_AUTOSIZE);
 
-    cv::Mat h_img = cv::imread(argv[1]);
+    cv::Mat h_img = cv::imread(argv[2]);
     cv::Mat h_result(h_img.rows, h_img.cols, CV_8UC3);
 
     cv::imshow("Original Image", h_img);
 
-    int kernel_size = std::stoi(argv[2]);
-    float sigma = std::stof(argv[3]);
+    int kernel_size = std::stoi(argv[3]);
+    float sigma = std::stof(argv[4]);
 
     auto begin = chrono::high_resolution_clock::now();
-    const int iter = 1;
+    const int iter = std::stoi(argv[1]);
     for (int i=0; i<iter ;i++)
     {
         #pragma omp parallel for 

@@ -26,19 +26,19 @@ int main(int argc, char** argv)
     cv::namedWindow("Original Image", cv::WINDOW_OPENGL | cv::WINDOW_AUTOSIZE);
     cv::namedWindow("Processed Image", cv::WINDOW_OPENGL | cv::WINDOW_AUTOSIZE);
 
-    cv::Mat h_img = cv::imread(argv[1]);
+    cv::Mat h_img = cv::imread(argv[2]);
     cv::Mat h_result(h_img.rows, h_img.cols/2, CV_8UC3);
 
     cv::imshow("Original Image", h_img);
 
-    int choice = std::stoi(argv[2]); // choose anaglyph mode
+    int choice = std::stoi(argv[3]); // choose anaglyph mode
     // matrices for anaglyph
     float mat_l[3][3];
     float mat_r[3][3];
     set_anaglyph_mats(choice, mat_l, mat_r);
 
     auto begin = chrono::high_resolution_clock::now();
-    const int iter = 10000;
+    const int iter = std::stoi(argv[1]);
     for (int i=0; i<iter ;i++)
     {
         #pragma omp parallel for 
