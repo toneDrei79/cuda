@@ -20,17 +20,9 @@ void anaglyph(const cv::Mat& src, cv::Mat& dst, int rows, int cols, float mat_l[
                 uchar rg = src.at<cv::Vec3b>(j,i+cols)[1];
                 uchar rb = src.at<cv::Vec3b>(j,i+cols)[0];
 
-
-                dst.at<cv::Vec3b>(j,i)[0] = 0;
-                dst.at<cv::Vec3b>(j,i)[1] = 0;
-                dst.at<cv::Vec3b>(j,i)[2] = 255;
-
-                // uchar pixel = src.at<uchar>(j,i);
-                // cout << pixel;
-                // break;
-                // dst(j,i).z = char(mat_l[0][0]*left.z + mat_l[0][1]*left.y + mat_l[0][2]*left.x + mat_r[0][0]*right.z + mat_r[0][1]*right.y + mat_r[0][2]*right.x);
-                // dst(j,i).y = char(mat_l[1][0]*left.z + mat_l[1][1]*left.y + mat_l[1][2]*left.x + mat_r[1][0]*right.z + mat_r[1][1]*right.y + mat_r[1][2]*right.x);
-                // dst(j,i).x = char(mat_l[2][0]*left.z + mat_l[2][1]*left.y + mat_l[2][2]*left.x + mat_r[2][0]*right.z + mat_r[2][1]*right.y + mat_r[2][2]*right.x);
+                dst.at<cv::Vec3b>(j,i)[2] = uchar(mat_l[0][0]*lr + mat_l[0][1]*lg + mat_l[0][2]*lb + mat_r[0][0]*rr + mat_r[0][1]*rg + mat_r[0][2]*rb);
+                dst.at<cv::Vec3b>(j,i)[1] = uchar(mat_l[1][0]*lr + mat_l[1][1]*lg + mat_l[1][2]*lb + mat_r[1][0]*rr + mat_r[1][1]*rg + mat_r[1][2]*rb);
+                dst.at<cv::Vec3b>(j,i)[0] = uchar(mat_l[2][0]*lr + mat_l[2][1]*lg + mat_l[2][2]*lb + mat_r[2][0]*rr + mat_r[2][1]*rg + mat_r[2][2]*rb);
             }
 
         
