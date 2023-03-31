@@ -1,4 +1,4 @@
-#include "anaglyphs.h"
+#include "anaglyph_mats.h"
 
 
 const float true_l[3][3] = {
