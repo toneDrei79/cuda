@@ -27,7 +27,8 @@ int main(int argc, char** argv)
 
     cv::imshow("Original Image", h_img);
 
-    int choice = std::stoi(argv[2]);
+    int choice = std::stoi(argv[2]); // choose anaglyph mode
+    // matrices for anaglyph
     float mat_l[3][3];
     float mat_r[3][3];
     set_anaglyph_mats(choice, mat_l, mat_r);
@@ -36,7 +37,7 @@ int main(int argc, char** argv)
     const int iter = 100000;
     for (int i=0; i<iter ;i++)
     {
-        startCUDA(d_img, d_result, &mat_l[0][0], &mat_r[0][0]);
+        startCUDA(d_img, d_result, &mat_l[0][0], &mat_r[0][0]); // send the address of the first element of matrices
     }
     auto end = std::chrono::high_resolution_clock::now();
     std::chrono::duration<double> diff = end - begin;

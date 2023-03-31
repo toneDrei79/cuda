@@ -29,13 +29,17 @@ int divUp(int a, int b)
     return ((a % b) != 0) ? (a / b + 1) : (a / b);
 }
 
+// receive matrices as 1-dim pointer
 void startCUDA(cv::cuda::GpuMat& src, cv::cuda::GpuMat& dst, float* mat_l, float* mat_r)
 {
     const dim3 block(32, 8);
     const dim3 grid(divUp(dst.cols, block.x), divUp(dst.rows, block.y));
 
+    // matrices on device
     float* dmat_l;
     float* dmat_r;
+
+    // allocate memory on device
     size_t mat_size;
     mat_size = sizeof(float) * 9;
     cudaMalloc((void **)&dmat_l, mat_size);
