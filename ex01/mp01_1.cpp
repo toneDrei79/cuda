@@ -2,10 +2,12 @@
 #include <opencv2/opencv.hpp>
 #include <chrono>  // for high_resolution_clock
 
-#include "anaglyphs.h"
+#include "anaglyph_mats.h"
 
 
 using namespace std;
+
+void anaglyph();
 
 int main(int argc, char** argv)
 {

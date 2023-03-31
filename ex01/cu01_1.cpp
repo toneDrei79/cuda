@@ -3,7 +3,7 @@
 #include <opencv2/cudawarping.hpp>
 #include <chrono>  // for high_resolution_clock
 
-#include "anaglyphs.h"
+#include "anaglyph_mats.h"
 
 
 using namespace std;
