@@ -25,11 +25,7 @@ int main(int argc, char** argv)
 
     cv::imshow("Original Image", h_img);
 
-    int choice = std::stoi(argv[2]); // choose anaglyph mode
-    // matrices for anaglyph
-    float mat_l[3][3];
-    float mat_r[3][3];
-    set_anaglyph_mats(choice, mat_l, mat_r);
+    int kernel_size = std::stoi(argv[2]);
 
     auto begin = chrono::high_resolution_clock::now();
     const int iter = 10000;
