@@ -10,8 +10,6 @@ using namespace std;
 
 void startCUDA(cv::cuda::GpuMat& src, cv::cuda::GpuMat& dst, float* mat_l, float* mat_r);
 
-void set_anaglyph_mats(int choice, float mat_l[3][3], float mat_r[3][3]);
-
 int main(int argc, char** argv)
 {
     cv::namedWindow("Original Image", cv::WINDOW_OPENGL | cv::WINDOW_AUTOSIZE);
