@@ -45,7 +45,7 @@ int main(int argc, char** argv)
     set_anaglyph_mats(choice, mat_l, mat_r);
 
     auto begin = chrono::high_resolution_clock::now();
-    const int iter = 100000;
+    const int iter = 10000;
     for (int i=0; i<iter ;i++)
     {
         anaglyph(h_img, h_result, h_result.rows, h_result.cols, mat_l, mat_r);

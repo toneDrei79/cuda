@@ -32,7 +32,7 @@ int main(int argc, char** argv)
     set_anaglyph_mats(choice, mat_l, mat_r);
 
     auto begin = chrono::high_resolution_clock::now();
-    const int iter = 100000;
+    const int iter = 10000;
     for (int i=0; i<iter ;i++)
     {
         startCUDA(d_img, d_result, &mat_l[0][0], &mat_r[0][0]); // send the address of the first element of matrices
