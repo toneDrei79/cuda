@@ -1,118 +1,119 @@
 #include "anaglyphs.h"
 
 
-const float trueL[3][3] = {
+const float true_l[3][3] = {
     {0.299, 0.587, 0.114},
     {0.   , 0.   , 0.   },
     {0.   , 0.   , 0.   }
 };
-const float trueR[3][3] = {
+const float true_r[3][3] = 
+{
     {0.   , 0.   , 0.   },
     {0.   , 0.   , 0.   },
     {0.299, 0.587, 0.114}
 };
 
-const float grayL[3][3] = {
+const float gray_l[3][3] = {
     {0.299, 0.587, 0.114},
     {0.   , 0.   , 0.   },
     {0.   , 0.   , 0.   }
 };
-const float grayR[3][3] = {
+const float gray_r[3][3] = {
     {0.   , 0.   , 0.   },
     {0.299, 0.587, 0.114},
     {0.299, 0.587, 0.114}
 };
 
-const float colorL[3][3] = {
+const float color_l[3][3] = {
     {1.   , 0.   , 0.   },
     {0.   , 0.   , 0.   },
     {0.   , 0.   , 0.   }
 };
-const float colorR[3][3] = {
+const float color_r[3][3] = {
     {0.   , 0.   , 0.   },
     {0.   , 1.   , 0.   },
     {0.   , 0.   , 1.   }
 };
 
-const float halfcolorL[3][3] = {
+const float halfcolor_l[3][3] = {
     {0.299, 0.587, 0.114},
     {0.   , 0.   , 0.   },
     {0.   , 0.   , 0.   }
 };
-const float halfcolorR[3][3] = {
+const float halfcolor_r[3][3] = {
     {0.   , 0.   , 0.   },
     {0.   , 1.   , 0.   },
     {0.   , 0.   , 1.   }
 };
 
-const float optimizedL[3][3] = {
+const float optimized_l[3][3] = {
     {0.   , 0.7  , 0.3  },
     {0.   , 0.   , 0.   },
     {0.   , 0.   , 0.   }
 };
-const float optimizedR[3][3] = {
+const float optimized_r[3][3] = {
     {0.   , 0.   , 0.   },
     {0.   , 1.   , 0.   },
     {0.   , 0.   , 1.   }
 };
 
 
-void setTrueAnaglyphMats(float matL[3][3], float matR[3][3])
+void set_true_mats(float mat_l[3][3], float mat_r[3][3])
 {
     for (int j=0; j<3; j++)
     {
         for (int i=0; i<3; i++)
         {
-            matL[j][i] = trueL[j][i];
-            matR[j][i] = trueR[j][i];
+            mat_l[j][i] = true_l[j][i];
+            mat_r[j][i] = true_r[j][i];
         }
     }
 }
 
-void setGrayAnaglyphMats(float matL[3][3], float matR[3][3])
+void set_gray_mats(float mat_l[3][3], float mat_r[3][3])
 {
     for (int j=0; j<3; j++)
     {
         for (int i=0; i<3; i++)
         {
-            matL[j][i] = grayL[j][i];
-            matR[j][i] = grayR[j][i];
+            mat_l[j][i] = gray_l[j][i];
+            mat_r[j][i] = gray_r[j][i];
         }
     }
 }
 
-void setColorAnaglyphMats(float matL[3][3], float matR[3][3])
+void set_color_mats(float mat_l[3][3], float mat_r[3][3])
 {
     for (int j=0; j<3; j++)
     {
         for (int i=0; i<3; i++)
         {
-            matL[j][i] = colorL[j][i];
-            matR[j][i] = colorR[j][i];
+            mat_l[j][i] = color_l[j][i];
+            mat_r[j][i] = color_r[j][i];
         }
     }
 }
 
-void setHalfcolorAnaglyphMats(float matL[3][3], float matR[3][3])
+void set_halfcolor_mats(float mat_l[3][3], float mat_r[3][3])
 {
     for (int j=0; j<3; j++)
     {
         for (int i=0; i<3; i++)
         {
-            matL[j][i] = halfcolorL[j][i];
-            matR[j][i] = halfcolorR[j][i];
+            mat_l[j][i] = halfcolor_l[j][i];
+            mat_r[j][i] = halfcolor_r[j][i];
         }
     }
 }
 
-void setOptimizedAnaglyphMats(float matL[3][3], float matR[3][3])
+void set_optimized_mats(float mat_l[3][3], float mat_r[3][3])
 {
     for (int j=0; j<3; j++)
     {
         for (int i=0; i<3; i++)
         {
-            matL[j][i] = optimizedL[j][i];
-            matR[j][i] = optimizedR[j][i];
+            mat_l[j][i] = optimized_l[j][i];
+            mat_r[j][i] = optimized_r[j][i];
         }
     }
 }

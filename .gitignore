@@ -2,7 +2,9 @@
 /examples
 /imagecuda
 /.DS_Store
+*/.DS_Store
 /obj
 /app
 */obj
 */app
+/.vscode
