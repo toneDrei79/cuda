@@ -6,15 +6,15 @@
 
 using namespace std;
 
-void startCUDA(cv::cuda::GpuMat& src, cv::cuda::GpuMat& dst, float* mat_l, float* mat_r);
+void startCUDA(cv::cuda::GpuMat& src, cv::cuda::GpuMat& dst, int kernel_size, int sigma);
 
 int main(int argc, char** argv)
 {
     cv::namedWindow("Original Image", cv::WINDOW_OPENGL | cv::WINDOW_AUTOSIZE);
     cv::namedWindow("Processed Image", cv::WINDOW_OPENGL | cv::WINDOW_AUTOSIZE);
 
-    cv::Mat h_img = cv::imread(argv[1]);
-    cv::Mat h_result(h_img.rows, h_img.cols/2, CV_8UC3);
+    cv::Mat h_img = cv::imread(argv[2]);
+    cv::Mat h_result(h_img.rows, h_img.cols, CV_8UC3);
 
     cv::cuda::GpuMat d_img, d_result;
 
@@ -23,14 +23,14 @@ int main(int argc, char** argv)
 
     cv::imshow("Original Image", h_img);
 
-    int kernel_size = std::stoi(argv[2]);
-    float sigma = std::stof(argv[3]);
+    int kernel_size = std::stoi(argv[3]);
+    float sigma = std::stof(argv[4]);
 
     auto begin = chrono::high_resolution_clock::now();
-    const int iter = 10000;
+    const int iter = std::stoi(argv[1]);
     for (int i=0; i<iter ;i++)
     {
-        startCUDA(d_img, d_result, &mat_l[0][0], &mat_r[0][0]); // send the address of the first element of matrices
+        startCUDA(d_img, d_result, kernel_size, sigma); // send the address of the first element of matrices
     }
     auto end = std::chrono::high_resolution_clock::now();
     std::chrono::duration<double> diff = end - begin;

@@ -10,18 +10,35 @@
 #include "helper_math.h"
 
 
-__global__ void process(const cv::cuda::PtrStep<uchar3> src, cv::cuda::PtrStep<uchar3> dst, int rows, int cols, float* mat_l, float* mat_r)
+#define PI 3.1415
+
+__global__ void process(const cv::cuda::PtrStep<uchar3> src, cv::cuda::PtrStep<uchar3> dst, int rows, int cols, int kernel_size, int sigma)
 {
     const int dst_x = blockDim.x * blockIdx.x + threadIdx.x;
     const int dst_y = blockDim.y * blockIdx.y + threadIdx.y;
 
-    uchar3 left = src(dst_y, dst_x);
-    uchar3 right = src(dst_y, dst_x + cols);
+    float3 rgb_sum = {0, 0, 0};
+    float gauss_sum = 0;
+    for (int j=-kernel_size/2; j<kernel_size/2+kernel_size%2; j++)
+        for (int i=-kernel_size/2; i<kernel_size/2+kernel_size%2; i++)
+        {
+            float gauss_val = (1./(2.*PI*pow(sigma, 2.))) * exp(-(pow(i,2.)+pow(j,2.))/(2.*pow(sigma,2.)));
+            gauss_sum += gauss_val;
 
-    // GBR order
-    dst(dst_y, dst_x).z = uchar(mat_l[0]*left.z + mat_l[1]*left.y + mat_l[2]*left.x + mat_r[0]*right.z + mat_r[1]*right.y + mat_r[2]*right.x);
-    dst(dst_y, dst_x).y = uchar(mat_l[3]*left.z + mat_l[4]*left.y + mat_l[5]*left.x + mat_r[3]*right.z + mat_r[4]*right.y + mat_r[5]*right.x);
-    dst(dst_y, dst_x).x = uchar(mat_l[6]*left.z + mat_l[7]*left.y + mat_l[8]*left.x + mat_r[6]*right.z + mat_r[7]*right.y + mat_r[8]*right.x);
+            int2 coord = {dst_x+i, dst_y+j};
+            if (coord.x < 0)  coord.x = 0;
+            if (coord.y < 0) coord.y = 0;
+            if (coord.x >= cols) coord.x = cols - 1;
+            if (coord.y >= rows) coord.y = rows - 1;
+
+            rgb_sum.x += gauss_val * src(coord.y, coord.x).x;
+            rgb_sum.y += gauss_val * src(coord.y, coord.x).y;
+            rgb_sum.z += gauss_val * src(coord.y, coord.x).z;
+        }
+    
+    dst(dst_y, dst_x).x = uchar(rgb_sum.x / gauss_sum);
+    dst(dst_y, dst_x).y = uchar(rgb_sum.y / gauss_sum);
+    dst(dst_y, dst_x).z = uchar(rgb_sum.z / gauss_sum);
 }
 
 int divUp(int a, int b)
@@ -30,25 +47,10 @@ int divUp(int a, int b)
 }
 
 // receive matrices as 1-dim pointer
-void startCUDA(cv::cuda::GpuMat& src, cv::cuda::GpuMat& dst, float* mat_l, float* mat_r)
+void startCUDA(cv::cuda::GpuMat& src, cv::cuda::GpuMat& dst, int kernel_size, int sigma)
 {
     const dim3 block(32, 8);
     const dim3 grid(divUp(dst.cols, block.x), divUp(dst.rows, block.y));
 
-    // matrices on device
-    float* dmat_l;
-    float* dmat_r;
-
-    // allocate memory on device
-    size_t mat_size;
-    mat_size = sizeof(float) * 9;
-    cudaMalloc((void **)&dmat_l, mat_size);
-    cudaMalloc((void **)&dmat_r, mat_size);
-    cudaMemcpy(dmat_l, mat_l, mat_size, cudaMemcpyHostToDevice);
-    cudaMemcpy(dmat_r, mat_r, mat_size, cudaMemcpyHostToDevice);
-
-    process<<<grid, block>>>(src, dst, dst.rows, dst.cols, dmat_l, dmat_r);
-
-    cudaFree(dmat_l);
-    cudaFree(dmat_r);
+    process<<<grid, block>>>(src, dst, dst.rows, dst.cols, kernel_size, sigma);
 }
