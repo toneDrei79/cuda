@@ -10,3 +10,9 @@ g++ -c -o obj/anaglyphs.o anaglyphs.cpp
 g++ -o app/anaglyph obj/cu01_1.o obj/anaglyphs.o
 
 /usr/local/cuda/bin/nvcc true.cu `pkg-config opencv4 --cflags --libs` cu01_1.cpp anaglyphs.cpp -o imcuda
+
+
+
+g++ -c -o objs/mp01_1.o `pkg-config opencv4 --cflags --libs` mp01_1.cpp
+g++ -c -o objs/anaglyph_mas.o anaglyph_mats.cpp
+g++ objs/mp01_1.o  objs/anaglyph_mats.o  -fopenmp `pkg-config opencv4 --libs` -lstdc++ -o apps/anaglyph_mp

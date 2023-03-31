@@ -19,9 +19,9 @@ __global__ void process(const cv::cuda::PtrStep<uchar3> src, cv::cuda::PtrStep<u
     uchar3 right = src(dst_y, dst_x + cols);
 
     // GBR order
-    dst(dst_y, dst_x).z = char(mat_l[0]*left.z + mat_l[1]*left.y + mat_l[2]*left.x + mat_r[0]*right.z + mat_r[1]*right.y + mat_r[2]*right.x);
-    dst(dst_y, dst_x).y = char(mat_l[3]*left.z + mat_l[4]*left.y + mat_l[5]*left.x + mat_r[3]*right.z + mat_r[4]*right.y + mat_r[5]*right.x);
-    dst(dst_y, dst_x).x = char(mat_l[6]*left.z + mat_l[7]*left.y + mat_l[8]*left.x + mat_r[6]*right.z + mat_r[7]*right.y + mat_r[8]*right.x);
+    dst(dst_y, dst_x).z = uchar(mat_l[0]*left.z + mat_l[1]*left.y + mat_l[2]*left.x + mat_r[0]*right.z + mat_r[1]*right.y + mat_r[2]*right.x);
+    dst(dst_y, dst_x).y = uchar(mat_l[3]*left.z + mat_l[4]*left.y + mat_l[5]*left.x + mat_r[3]*right.z + mat_r[4]*right.y + mat_r[5]*right.x);
+    dst(dst_y, dst_x).x = uchar(mat_l[6]*left.z + mat_l[7]*left.y + mat_l[8]*left.x + mat_r[6]*right.z + mat_r[7]*right.y + mat_r[8]*right.x);
 }
 
 int divUp(int a, int b)
