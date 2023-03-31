@@ -23,9 +23,7 @@ void anaglyph(const cv::Mat& src, cv::Mat& dst, int rows, int cols, float mat_l[
                 dst.at<cv::Vec3b>(j,i)[2] = uchar(mat_l[0][0]*lr + mat_l[0][1]*lg + mat_l[0][2]*lb + mat_r[0][0]*rr + mat_r[0][1]*rg + mat_r[0][2]*rb);
                 dst.at<cv::Vec3b>(j,i)[1] = uchar(mat_l[1][0]*lr + mat_l[1][1]*lg + mat_l[1][2]*lb + mat_r[1][0]*rr + mat_r[1][1]*rg + mat_r[1][2]*rb);
                 dst.at<cv::Vec3b>(j,i)[0] = uchar(mat_l[2][0]*lr + mat_l[2][1]*lg + mat_l[2][2]*lb + mat_r[2][0]*rr + mat_r[2][1]*rg + mat_r[2][2]*rb);
-            }
-
-        
+            }       
 }
 
 int main(int argc, char** argv)
