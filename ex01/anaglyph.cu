@@ -10,7 +10,8 @@
 #include "helper_math.h"
 
 
-__global__ void process(const cv::cuda::PtrStep<uchar3> src, cv::cuda::PtrStep<uchar3> dst, int rows, int cols, float* mat_l, float* mat_r) {
+__global__ void process(const cv::cuda::PtrStep<uchar3> src, cv::cuda::PtrStep<uchar3> dst, int rows, int cols, float* mat_l, float* mat_r)
+{
     const int dst_x = blockDim.x * blockIdx.x + threadIdx.x;
     const int dst_y = blockDim.y * blockIdx.y + threadIdx.y;
 
@@ -23,7 +24,8 @@ __global__ void process(const cv::cuda::PtrStep<uchar3> src, cv::cuda::PtrStep<u
     dst(dst_y, dst_x).x = char(mat_l[6]*left.z + mat_l[7]*left.y + mat_l[8]*left.x + mat_r[6]*right.z + mat_r[7]*right.y + mat_r[8]*right.x);
 }
 
-int divUp(int a, int b) {
+int divUp(int a, int b)
+{
     return ((a % b) != 0) ? (a / b + 1) : (a / b);
 }
 
