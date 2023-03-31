@@ -117,3 +117,17 @@ void set_optimized_mats(float mat_l[3][3], float mat_r[3][3])
         }
     }
 }
+
+
+void set_anaglyph_mats(int choice, float mat_l[3][3], float mat_r[3][3])
+{
+    switch (choice)
+    {
+        case 0: set_true_mats(mat_l, mat_r); break;
+        case 1: set_gray_mats(mat_l, mat_r); break;
+        case 2: set_color_mats(mat_l, mat_r); break;
+        case 3: set_halfcolor_mats(mat_l, mat_r); break;
+        case 4: set_optimized_mats(mat_l, mat_r); break;
+        default:;
+    }
+}
