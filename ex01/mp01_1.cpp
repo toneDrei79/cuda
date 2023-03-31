@@ -49,7 +49,6 @@ int main(int argc, char** argv)
     for (int i=0; i<iter ;i++)
     {
         anaglyph(h_img, h_result, h_result.rows, h_result.cols, mat_l, mat_r);
-        break;
     }
     auto end = std::chrono::high_resolution_clock::now();
     std::chrono::duration<double> diff = end - begin;
