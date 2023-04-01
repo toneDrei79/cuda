@@ -6,7 +6,7 @@
 
 using namespace std;
 
-void startCUDA(cv::cuda::GpuMat& src, cv::cuda::GpuMat& dst, int kernel_size, int sigma);
+void startCUDA(cv::cuda::GpuMat& src, cv::cuda::GpuMat& dst, int kernel_size, float gamma);
 
 int main(int argc, char** argv)
 {
@@ -30,7 +30,7 @@ int main(int argc, char** argv)
     const int iter = std::stoi(argv[1]);
     for (int i=0; i<iter ;i++)
     {
-        startCUDA(d_img, d_result, kernel_size, sigma);
+        startCUDA(d_img, d_result, neighbour_size, gamma);
     }
     auto end = std::chrono::high_resolution_clock::now();
     std::chrono::duration<double> diff = end - begin;

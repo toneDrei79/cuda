@@ -2,6 +2,7 @@
 #include <opencv2/opencv.hpp>
 #include <chrono>  // for high_resolution_clock
 
+
 #define MAX_KERNEL 9
 #define SIGMA 1.5
 #define PI 3.1415
@@ -40,7 +41,7 @@ void gaussian_filtering(const cv::Mat& src, cv::Mat& dst, int rows, int cols, in
     dst.at<cv::Vec3b>(y,x)[0] = uchar(b_sum / gauss_sum);
 }
 
-void denoising(const cv::Mat& src, const cv::Mat& normalized_src, cv::Mat& dst, int rows, int cols, int neighbour, float gamma, int x, int y)
+void denoising(const cv::Mat& src, cv::Mat& dst, int rows, int cols, int neighbour, float gamma, int x, int y)
 {
     int N = neighbour * neighbour;
 
@@ -60,11 +61,9 @@ void denoising(const cv::Mat& src, const cv::Mat& normalized_src, cv::Mat& dst, 
                 if (idx_x >= cols) idx_x = cols - 1;
                 if (idx_y >= rows) idx_y = rows - 1;
                 mean[n] += src.at<cv::Vec3b>(idx_y, idx_x)[n];
-                // mean[n] += normalized_src.at<cv::Vec3f>(idx_y, idx_x)[n];
             }
         mean[n] /= N;
     }
-    // cout << mean[0] << ' ' << mean[1] << ' ' << mean[2] << endl;
 
     float covariance_mat[3][3] = {
         0., 0., 0.,
@@ -87,7 +86,6 @@ void denoising(const cv::Mat& src, const cv::Mat& normalized_src, cv::Mat& dst, 
                     if (idx_x >= cols) idx_x = cols - 1;
                     if (idx_y >= rows) idx_y = rows - 1;
                     covariance_mat[n2][n1] += (src.at<cv::Vec3b>(idx_y, idx_x)[n1]-mean[n1]) * (src.at<cv::Vec3b>(idx_y, idx_x)[n1]-mean[n2]);
-                    // covariance_mat[n2][n1] += (normalized_src.at<cv::Vec3f>(idx_y, idx_x)[n1]-mean[n1]) * (normalized_src.at<cv::Vec3f>(idx_y, idx_x)[n1]-mean[n2]);
                 }
             covariance_mat[n2][n1] /= N;
         }
@@ -105,13 +103,10 @@ void denoising(const cv::Mat& src, const cv::Mat& normalized_src, cv::Mat& dst, 
     }
     determinant = abs(determinant);
 
-    // cout << determinant << " : ";
-
-    // int kernel_size = ceil(MAX_KERNEL/(1.+pow(gamma, determinant)));
-    // int kernel_size = min(float(MAX_KERNEL), gamma*log(determinant + 1));
     int kernel_size = MAX_KERNEL / (pow(determinant, gamma) + 1);
-    // kernel_size = max(1, kernel_size); // kernel size must be at least 1
+    kernel_size = max(1, kernel_size); // kernel size must be at least 1
 
+    // cout << determinant << " : ";
     // cout << kernel_size << endl;
 
     gaussian_filtering(src, dst, rows, cols, kernel_size, x, y);
@@ -125,10 +120,6 @@ int main(int argc, char** argv)
     cv::Mat h_img = cv::imread(argv[2]);
     cv::Mat h_result(h_img.rows, h_img.cols, CV_8UC3);
 
-    // normalize src image for covariance calculation
-    cv::Mat normalized_src;
-    h_img.convertTo(normalized_src, CV_32FC3, 1./255.);
-
     cv::imshow("Original Image", h_img);
 
     int neighbour = std::stoi(argv[3]);
@@ -138,12 +129,12 @@ int main(int argc, char** argv)
     const int iter = std::stoi(argv[1]);
     for (int i=0; i<iter ;i++)
     {
-        // #pragma omp parallel for 
+        #pragma omp parallel for
             // for each pixel
             for (int j=0; j<h_result.rows; j++)
                 for (int i=0; i<h_result.cols; i++)
                 {
-                    denoising(h_img, normalized_src, h_result, h_result.rows, h_result.cols, neighbour, gamma, i, j);
+                    denoising(h_img, h_result, h_result.rows, h_result.cols, neighbour, gamma, i, j);
                 }
     }
     auto end = std::chrono::high_resolution_clock::now();
