@@ -2,7 +2,7 @@
 #include <opencv2/opencv.hpp>
 #include <chrono>  // for high_resolution_clock
 
-#define MAX_KERNEL 3
+#define MAX_KERNEL 9
 #define SIGMA 1.5
 #define PI 3.1415
 
@@ -40,13 +40,13 @@ void gaussian_filtering(const cv::Mat& src, cv::Mat& dst, int rows, int cols, in
     dst.at<cv::Vec3b>(y,x)[0] = uchar(b_sum / gauss_sum);
 }
 
-void denoising(const cv::Mat& src, cv::Mat& dst, int rows, int cols, int neighbour, float gamma, int x, int y)
+void denoising(const cv::Mat& src, const cv::Mat& normalized_src, cv::Mat& dst, int rows, int cols, int neighbour, float gamma, int x, int y)
 {
     int N = neighbour * neighbour;
 
     float mean[3] = {0., 0., 0.};
     // for rgb
-    for (int n=0; n<N; n++)
+    for (int n=0; n<3; n++)
     {
         // for all neighbours
         for (int j=-neighbour/2; j<neighbour/2+neighbour%2; j++)
@@ -60,9 +60,11 @@ void denoising(const cv::Mat& src, cv::Mat& dst, int rows, int cols, int neighbo
                 if (idx_x >= cols) idx_x = cols - 1;
                 if (idx_y >= rows) idx_y = rows - 1;
                 mean[n] += src.at<cv::Vec3b>(idx_y, idx_x)[n];
+                // mean[n] += normalized_src.at<cv::Vec3f>(idx_y, idx_x)[n];
             }
         mean[n] /= N;
     }
+    // cout << mean[0] << ' ' << mean[1] << ' ' << mean[2] << endl;
 
     float covariance_mat[3][3] = {
         0., 0., 0.,
@@ -70,8 +72,8 @@ void denoising(const cv::Mat& src, cv::Mat& dst, int rows, int cols, int neighbo
         0., 0., 0.
     };
     // for all combinations of rgb
-    for (int n2=0; n2<N; n2++)
-        for (int n1=0; n1<N; n1++)
+    for (int n2=0; n2<3; n2++)
+        for (int n1=0; n1<3; n1++)
         {
             // for all neighbours
             for (int j=-neighbour/2; j<neighbour/2+neighbour%2; j++)
@@ -85,25 +87,30 @@ void denoising(const cv::Mat& src, cv::Mat& dst, int rows, int cols, int neighbo
                     if (idx_x >= cols) idx_x = cols - 1;
                     if (idx_y >= rows) idx_y = rows - 1;
                     covariance_mat[n2][n1] += (src.at<cv::Vec3b>(idx_y, idx_x)[n1]-mean[n1]) * (src.at<cv::Vec3b>(idx_y, idx_x)[n1]-mean[n2]);
+                    // covariance_mat[n2][n1] += (normalized_src.at<cv::Vec3f>(idx_y, idx_x)[n1]-mean[n1]) * (normalized_src.at<cv::Vec3f>(idx_y, idx_x)[n1]-mean[n2]);
                 }
-            covariance_mat[n2][n1] /= N * N;
+            covariance_mat[n2][n1] /= N;
         }
     
     // cout << covariance_mat[0][0] << ' ' << covariance_mat[0][1] << ' ' << covariance_mat[0][2] << endl;
     // cout << covariance_mat[1][0] << ' ' << covariance_mat[1][1] << ' ' << covariance_mat[1][2] << endl;
-    // cout << covariance_mat[2][0] << ' ' << covariance_mat[2][1] << ' ' << covariance_mat[2][2] << endl;
+    // cout << covariance_mat[2][0] << ' ' << covariance_mat[2][1] << ' ' << covariance_mat[2][2] << endl << endl;
 
     float determinant = 0.;
-    for (int n=0; n<N; n++)
+    for (int n=0; n<3; n++)
     {
         determinant += covariance_mat[0][n] * (
             covariance_mat[1][(n+1)%3]*covariance_mat[2][(n+2)%3] - covariance_mat[1][(n+2)%3]*covariance_mat[2][(n+1)%3]
         );
     }
+    determinant = abs(determinant);
 
-    // cout << determinant << endl;
+    // cout << determinant << " : ";
 
-    int kernel_size = ceil(MAX_KERNEL/(1.+pow(gamma, -determinant)));
+    // int kernel_size = ceil(MAX_KERNEL/(1.+pow(gamma, determinant)));
+    // int kernel_size = min(float(MAX_KERNEL), gamma*log(determinant + 1));
+    int kernel_size = MAX_KERNEL / (pow(determinant, gamma) + 1);
+    // kernel_size = max(1, kernel_size); // kernel size must be at least 1
 
     // cout << kernel_size << endl;
 
@@ -118,6 +125,10 @@ int main(int argc, char** argv)
     cv::Mat h_img = cv::imread(argv[2]);
     cv::Mat h_result(h_img.rows, h_img.cols, CV_8UC3);
 
+    // normalize src image for covariance calculation
+    cv::Mat normalized_src;
+    h_img.convertTo(normalized_src, CV_32FC3, 1./255.);
+
     cv::imshow("Original Image", h_img);
 
     int neighbour = std::stoi(argv[3]);
@@ -127,12 +138,12 @@ int main(int argc, char** argv)
     const int iter = std::stoi(argv[1]);
     for (int i=0; i<iter ;i++)
     {
-        #pragma omp parallel for 
+        // #pragma omp parallel for 
             // for each pixel
             for (int j=0; j<h_result.rows; j++)
                 for (int i=0; i<h_result.cols; i++)
                 {
-                    denoising(h_img, h_result, h_result.rows, h_result.cols, neighbour, gamma, i, j);
+                    denoising(h_img, normalized_src, h_result, h_result.rows, h_result.cols, neighbour, gamma, i, j);
                 }
     }
     auto end = std::chrono::high_resolution_clock::now();
