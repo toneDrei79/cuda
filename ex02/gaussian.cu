@@ -30,32 +30,40 @@ __global__ void process(const cv::cuda::PtrStep<uchar3> src, cv::cuda::PtrStep<u
     block_src[size_x*l_idx_y + l_idx_x].z = src(g_idx_y, g_idx_x).z;
 
     // copy extra pixels to the edge of rectangular buffer in order to perform kernel operations
-    if (threadIdx.x < radius && threadIdx.y < radius) { // top-left corner
+    if (threadIdx.x < radius && threadIdx.y < radius) { // when near the top-left corner, copy to ...
+        // left top
         block_src[size_x*(l_idx_y-radius) + l_idx_x-radius].x = src(g_idx_y-radius, g_idx_x-radius).x;
         block_src[size_x*(l_idx_y-radius) + l_idx_x-radius].y = src(g_idx_y-radius, g_idx_x-radius).y;
         block_src[size_x*(l_idx_y-radius) + l_idx_x-radius].z = src(g_idx_y-radius, g_idx_x-radius).z;
+        // right top
         block_src[size_x*(l_idx_y-radius) + l_idx_x+blockDim.x].x = src(g_idx_y-radius, g_idx_x+blockDim.x).x;
         block_src[size_x*(l_idx_y-radius) + l_idx_x+blockDim.x].y = src(g_idx_y-radius, g_idx_x+blockDim.x).y;
         block_src[size_x*(l_idx_y-radius) + l_idx_x+blockDim.x].z = src(g_idx_y-radius, g_idx_x+blockDim.x).z;
+        // left buttom
         block_src[size_x*(l_idx_y+blockDim.y) + l_idx_x-radius].x = src(g_idx_y+blockDim.y, g_idx_x-radius).x;
         block_src[size_x*(l_idx_y+blockDim.y) + l_idx_x-radius].y = src(g_idx_y+blockDim.y, g_idx_x-radius).y;
         block_src[size_x*(l_idx_y+blockDim.y) + l_idx_x-radius].z = src(g_idx_y+blockDim.y, g_idx_x-radius).z;
+        // right buttom
         block_src[size_x*(l_idx_y+blockDim.y) + l_idx_x+blockDim.x].x = src(g_idx_y+blockDim.y, g_idx_x+blockDim.x).x;
         block_src[size_x*(l_idx_y+blockDim.y) + l_idx_x+blockDim.x].y = src(g_idx_y+blockDim.y, g_idx_x+blockDim.x).y;
         block_src[size_x*(l_idx_y+blockDim.y) + l_idx_x+blockDim.x].z = src(g_idx_y+blockDim.y, g_idx_x+blockDim.x).z;
     }
-    if (threadIdx.x < radius) { // left edge
+    if (threadIdx.x < radius) { // when neat the left edge, copy to ...
+        // left edge
         block_src[size_x*l_idx_y + l_idx_x-radius].x = src(g_idx_y, g_idx_x-radius).x;
         block_src[size_x*l_idx_y + l_idx_x-radius].y = src(g_idx_y, g_idx_x-radius).y;
         block_src[size_x*l_idx_y + l_idx_x-radius].z = src(g_idx_y, g_idx_x-radius).z;
+        // right edge
         block_src[size_x*l_idx_y + l_idx_x+blockDim.x].x = src(g_idx_y, g_idx_x+blockDim.x).x;
         block_src[size_x*l_idx_y + l_idx_x+blockDim.x].y = src(g_idx_y, g_idx_x+blockDim.x).y;
         block_src[size_x*l_idx_y + l_idx_x+blockDim.x].z = src(g_idx_y, g_idx_x+blockDim.x).z;
     }
-    if (threadIdx.y < radius) { // top edge
+    if (threadIdx.y < radius) { // when near the top edge, copy to ...
+        // top edge
         block_src[size_x*(l_idx_y-radius) + l_idx_x].x = src(g_idx_y-radius, g_idx_x).x;
         block_src[size_x*(l_idx_y-radius) + l_idx_x].y = src(g_idx_y-radius, g_idx_x).y;
         block_src[size_x*(l_idx_y-radius) + l_idx_x].z = src(g_idx_y-radius, g_idx_x).z;
+        // buttom edge
         block_src[size_x*(l_idx_y+blockDim.y) + l_idx_x].x = src(g_idx_y+blockDim.y, g_idx_x).x;
         block_src[size_x*(l_idx_y+blockDim.y) + l_idx_x].y = src(g_idx_y+blockDim.y, g_idx_x).y;
         block_src[size_x*(l_idx_y+blockDim.y) + l_idx_x].z = src(g_idx_y+blockDim.y, g_idx_x).z;
