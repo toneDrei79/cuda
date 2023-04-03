@@ -104,7 +104,7 @@ void denoising(const cv::Mat& src, cv::Mat& dst, int rows, int cols, int neighbo
     determinant = abs(determinant);
 
     int kernel_size = MAX_KERNEL / (pow(determinant, gamma) + 1);
-    kernel_size = max(1, kernel_size); // kernel size must be at least 1
+    kernel_size = min(MAX_KERNEL, max(1, kernel_size)); // kernel size must be in range 1~MAX_KERNEL
 
     // cout << determinant << " : ";
     // cout << kernel_size << endl;

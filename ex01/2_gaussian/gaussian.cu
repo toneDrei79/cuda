@@ -28,7 +28,7 @@ __global__ void process(const cv::cuda::PtrStep<uchar3> src, cv::cuda::PtrStep<u
             gauss_sum += gauss_val;
 
             int2 coord = {dst_x+i, dst_y+j};
-            // if coord is out of edge
+            // if coord is out of image refer the pixel on the edge
             if (coord.x < 0)  coord.x = 0;
             if (coord.y < 0) coord.y = 0;
             if (coord.x >= cols) coord.x = cols - 1;
