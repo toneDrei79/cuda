@@ -10,7 +10,7 @@
 #include "helper_math.h"
 
 
-#define MAX_KERNEL 9
+#define MAX_KERNEL 15
 #define SIGMA 1.5
 #define PI 3.1415
 
@@ -48,18 +48,22 @@ __global__ void process(const cv::cuda::PtrStep<uchar3> src, cv::cuda::PtrStep<u
                     case 2: col = src(coord.y, coord.x).z; break;
                 }
                 mean[n] += col;
-                // printf("%d\n", col);
                 // mean[n] += src(coord.y, coord.x)[n];
             }
         mean[n] /= N;
     }
-    // printf("%f\n", mean[0]);
+    // printf("%f %f %f\n", mean[0], mean[1], mean[2]);
+    // dst(dst_y, dst_x).x = uchar(mean[0]);
+    // dst(dst_y, dst_x).y = uchar(mean[1]);
+    // dst(dst_y, dst_x).z = uchar(mean[2]);    
+    // return;
 
     float covariance_mat[3][3] = {
         0., 0., 0.,
         0., 0., 0.,
         0., 0., 0.
     };
+    // printf("%ld\n", sizeof(covariance_mat[0][0]));
     // for all combinations of rgb
     for (int n2=0; n2<3; n2++)
         for (int n1=0; n1<3; n1++)
@@ -78,26 +82,30 @@ __global__ void process(const cv::cuda::PtrStep<uchar3> src, cv::cuda::PtrStep<u
                     uchar col1, col2;
                     switch (n1)
                     {
-                        case 0: col1 = src(coord.y, coord.x).x; break;
-                        case 1: col1 = src(coord.y, coord.x).y; break;
-                        case 2: col1 = src(coord.y, coord.x).z; break;
+                        case 0: col1 = uchar(src(coord.y, coord.x).x); break;
+                        case 1: col1 = uchar(src(coord.y, coord.x).y); break;
+                        case 2: col1 = uchar(src(coord.y, coord.x).z); break;
                     }
                     switch (n2)
                     {
-                        case 0: col2 = src(coord.y, coord.x).x; break;
-                        case 1: col2 = src(coord.y, coord.x).y; break;
-                        case 2: col2 = src(coord.y, coord.x).z; break;
+                        case 0: col2 = uchar(src(coord.y, coord.x).x); break;
+                        case 1: col2 = uchar(src(coord.y, coord.x).y); break;
+                        case 2: col2 = uchar(src(coord.y, coord.x).z); break;
                     }
+                    // printf("%d, %d\n", col1, col2);
                     covariance_mat[n2][n1] += (col1-mean[n1]) * (col2-mean[n2]);
-                    // covariance_mat[n2][n1] += (src(coord.y, coord.x)[n1]-mean[n1]) * (src(coord.y, coord.x)[n2]-mean[n2]);
                 }
             covariance_mat[n2][n1] /= N;
         }
     
-    // printf("%f\n", covariance_mat[1][2]);
-    // cout << covariance_mat[0][0] << ' ' << covariance_mat[0][1] << ' ' << covariance_mat[0][2] << endl;
-    // cout << covariance_mat[1][0] << ' ' << covariance_mat[1][1] << ' ' << covariance_mat[1][2] << endl;
-    // cout << covariance_mat[2][0] << ' ' << covariance_mat[2][1] << ' ' << covariance_mat[2][2] << endl << endl;
+    // dst(dst_y, dst_x).x = uchar(covariance_mat[0][0]);
+    // dst(dst_y, dst_x).y = uchar(covariance_mat[0][0]);
+    // dst(dst_y, dst_x).z = uchar(covariance_mat[0][0]);
+    // return;
+    
+    // printf("%f %f %f\n", covariance_mat[0][0], covariance_mat[0][1], covariance_mat[0][2]);
+    // printf("%f %f %f\n", covariance_mat[1][0], covariance_mat[1][1], covariance_mat[1][2]);
+    // printf("%f %f %f\n\n", covariance_mat[2][0], covariance_mat[2][1], covariance_mat[2][2]);
 
     float determinant = 0.;
     for (int n=0; n<3; n++)
@@ -106,14 +114,19 @@ __global__ void process(const cv::cuda::PtrStep<uchar3> src, cv::cuda::PtrStep<u
             covariance_mat[1][(n+1)%3]*covariance_mat[2][(n+2)%3] - covariance_mat[1][(n+2)%3]*covariance_mat[2][(n+1)%3]
         );
     }
-    determinant = abs(determinant);
+    determinant = log10(abs(determinant)+1);
+    // printf("%f\n", determinant);
 
 
     // printf("%f\n", determinant);
 
 
-    int kernel_size = MAX_KERNEL / (pow(determinant, gamma) + 1.);
+    int kernel_size = MAX_KERNEL / float(pow(determinant, gamma) + 1.);
     kernel_size = max(1, kernel_size); // kernel size must be at least 1
+    // dst(dst_y, dst_x).x = uchar(0);
+    // dst(dst_y, dst_x).y = uchar(kernel_size * 15);
+    // dst(dst_y, dst_x).z = uchar(0);
+    // return;
 
     // printf("%d\n", kernel_size);
 

@@ -3,11 +3,13 @@
 #include <chrono>  // for high_resolution_clock
 
 
-#define MAX_KERNEL 9
+#define MAX_KERNEL 15
 #define SIGMA 1.5
 #define PI 3.1415
 
 using namespace std;
+
+float av = 0.0;
 
 void gaussian_filtering(const cv::Mat& src, cv::Mat& dst, int rows, int cols, int kernel_size, int x, int y)
 {
@@ -61,15 +63,23 @@ void denoising(const cv::Mat& src, cv::Mat& dst, int rows, int cols, int neighbo
                 if (idx_x >= cols) idx_x = cols - 1;
                 if (idx_y >= rows) idx_y = rows - 1;
                 mean[n] += src.at<cv::Vec3b>(idx_y, idx_x)[n];
+                int a = src.at<cv::Vec3b>(idx_y, idx_x)[n];
+                // cout << a << endl;
             }
         mean[n] /= N;
     }
+    // cout << mean[0] << ' ' << mean[1] << ' ' << mean[2] << endl;
+    // dst.at<cv::Vec3b>(y,x)[0] = uchar(mean[0]);
+    // dst.at<cv::Vec3b>(y,x)[1] = uchar(mean[1]);
+    // dst.at<cv::Vec3b>(y,x)[2] = uchar(mean[2]);
+    // return;
 
     float covariance_mat[3][3] = {
         0., 0., 0.,
         0., 0., 0.,
         0., 0., 0.
     };
+    // printf("%ld\n", sizeof(covariance_mat[0][0]));
     // for all combinations of rgb
     for (int n2=0; n2<3; n2++)
         for (int n1=0; n1<3; n1++)
@@ -85,11 +95,19 @@ void denoising(const cv::Mat& src, cv::Mat& dst, int rows, int cols, int neighbo
                     if (idx_y < 0) idx_y = 0;
                     if (idx_x >= cols) idx_x = cols - 1;
                     if (idx_y >= rows) idx_y = rows - 1;
-                    covariance_mat[n2][n1] += (src.at<cv::Vec3b>(idx_y, idx_x)[n1]-mean[n1]) * (src.at<cv::Vec3b>(idx_y, idx_x)[n1]-mean[n2]);
+                    covariance_mat[n2][n1] += (src.at<cv::Vec3b>(idx_y, idx_x)[n1]-mean[n1]) * (src.at<cv::Vec3b>(idx_y, idx_x)[n2]-mean[n2]);
+                    int a = src.at<cv::Vec3b>(idx_y, idx_x)[n1];
+                    int b = src.at<cv::Vec3b>(idx_y, idx_x)[n2];
+                    // cout << a << ", " << b << endl;
                 }
             covariance_mat[n2][n1] /= N;
         }
+    // dst.at<cv::Vec3b>(y,x)[0] = uchar(covariance_mat[0][0]);
+    // dst.at<cv::Vec3b>(y,x)[1] = uchar(covariance_mat[0][0]);
+    // dst.at<cv::Vec3b>(y,x)[2] = uchar(covariance_mat[0][0]);
+    // return;
     
+    // cout << covariance_mat[1][2] << endl;
     // cout << covariance_mat[0][0] << ' ' << covariance_mat[0][1] << ' ' << covariance_mat[0][2] << endl;
     // cout << covariance_mat[1][0] << ' ' << covariance_mat[1][1] << ' ' << covariance_mat[1][2] << endl;
     // cout << covariance_mat[2][0] << ' ' << covariance_mat[2][1] << ' ' << covariance_mat[2][2] << endl << endl;
@@ -101,12 +119,19 @@ void denoising(const cv::Mat& src, cv::Mat& dst, int rows, int cols, int neighbo
             covariance_mat[1][(n+1)%3]*covariance_mat[2][(n+2)%3] - covariance_mat[1][(n+2)%3]*covariance_mat[2][(n+1)%3]
         );
     }
-    determinant = abs(determinant);
+    determinant = log10(abs(determinant)+1);
+    // cout << determinant << endl;
+    // av += determinant / (rows * cols);
+    // cout << av;
 
-    int kernel_size = MAX_KERNEL / (pow(determinant, gamma) + 1);
-    kernel_size = min(MAX_KERNEL, max(1, kernel_size)); // kernel size must be in range 1~MAX_KERNEL
+    int kernel_size = MAX_KERNEL / (pow(determinant, gamma) + 1.);
+    kernel_size = max(1, kernel_size); // kernel size must be at least 1
+    // dst.at<cv::Vec3b>(y,x)[0] = uchar(0);
+    // dst.at<cv::Vec3b>(y,x)[1] = uchar(kernel_size * 15);
+    // dst.at<cv::Vec3b>(y,x)[2] = uchar(0);
+    // return;
 
-    // cout << determinant << " : ";
+    // kernel_size = max(1, kernel_size); // kernel size must be > 0
     // cout << kernel_size << endl;
 
     gaussian_filtering(src, dst, rows, cols, kernel_size, x, y);
@@ -129,7 +154,7 @@ int main(int argc, char** argv)
     const int iter = std::stoi(argv[1]);
     for (int i=0; i<iter ;i++)
     {
-        #pragma omp parallel for
+        // #pragma omp parallel for
             // for each pixel
             for (int j=0; j<h_result.rows; j++)
                 for (int i=0; i<h_result.cols; i++)
