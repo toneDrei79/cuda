@@ -10,7 +10,6 @@
 #include "helper_math.h"
 
 
-#define MAX_KERNEL 15
 #define SIGMA 1.5
 #define PI 3.1415
 

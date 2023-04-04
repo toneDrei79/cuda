@@ -6,7 +6,6 @@
 #include "gaussian_filtering.h"
 
 
-#define MAX_KERNEL 15
 #define SIGMA 1.5
 
 using namespace std;
