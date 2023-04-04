@@ -12,13 +12,11 @@
 
 #define PI 3.1415
 
-__global__ void process(const cv::cuda::PtrStep<uchar3> src, cv::cuda::PtrStep<uchar3> dst,
+__device__ void gaussian_filtering(const cv::cuda::PtrStep<uchar3> src, cv::cuda::PtrStep<uchar3> dst,
                         int rows, int cols,
-                        int kernel_size, int sigma)
+                        int kernel_size, int sigma,
+                        int x, int y)
 {
-    const int dst_x = blockDim.x * blockIdx.x + threadIdx.x;
-    const int dst_y = blockDim.y * blockIdx.y + threadIdx.y;
-
     float3 rgb_sum = {0, 0, 0};
     float gauss_sum = 0;
     // for each kernel pixel
@@ -29,7 +27,7 @@ __global__ void process(const cv::cuda::PtrStep<uchar3> src, cv::cuda::PtrStep<u
             float gauss_val = (1./(2.*PI*pow(sigma, 2.))) * exp(-(pow(i,2.)+pow(j,2.))/(2.*pow(sigma,2.)));
             gauss_sum += gauss_val;
 
-            int2 coord = {dst_x+i, dst_y+j};
+            int2 coord = {x+i, y+j};
             // if coord is out of image refer the pixel on the edge
             if (coord.x < 0)  coord.x = 0;
             if (coord.y < 0) coord.y = 0;
@@ -41,9 +39,19 @@ __global__ void process(const cv::cuda::PtrStep<uchar3> src, cv::cuda::PtrStep<u
             rgb_sum.z += gauss_val * src(coord.y, coord.x).z;
         }
     
-    dst(dst_y, dst_x).x = uchar(rgb_sum.x / gauss_sum);
-    dst(dst_y, dst_x).y = uchar(rgb_sum.y / gauss_sum);
-    dst(dst_y, dst_x).z = uchar(rgb_sum.z / gauss_sum);
+    dst(y, x).x = uchar(rgb_sum.x / gauss_sum);
+    dst(y, x).y = uchar(rgb_sum.y / gauss_sum);
+    dst(y, x).z = uchar(rgb_sum.z / gauss_sum);
+}
+
+__global__ void process(const cv::cuda::PtrStep<uchar3> src, cv::cuda::PtrStep<uchar3> dst,
+                        int rows, int cols,
+                        int kernel_size, int sigma)
+{
+    const int dst_x = blockDim.x * blockIdx.x + threadIdx.x;
+    const int dst_y = blockDim.y * blockIdx.y + threadIdx.y;
+
+    gaussian_filtering(src, dst, rows, cols, kernel_size, sigma, dst_x, dst_y);
 }
 
 int divUp(int a, int b)
