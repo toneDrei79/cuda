@@ -43,7 +43,7 @@ void gaussian_filtering(const cv::Mat& src, cv::Mat& dst, int rows, int cols, in
     dst.at<cv::Vec3b>(y,x)[0] = uchar(b_sum / gauss_sum);
 }
 
-void denoising(const cv::Mat& src, cv::Mat& dst, int rows, int cols, int neighbour, float gamma, int x, int y)
+void denoising(const cv::Mat& src, cv::Mat& dst, int rows, int cols, int neighbour, float gamma, int x, int y, int mode)
 {
     int N = neighbour * neighbour;
 
@@ -68,18 +68,13 @@ void denoising(const cv::Mat& src, cv::Mat& dst, int rows, int cols, int neighbo
             }
         mean[n] /= N;
     }
-    // cout << mean[0] << ' ' << mean[1] << ' ' << mean[2] << endl;
-    // dst.at<cv::Vec3b>(y,x)[0] = uchar(mean[0]);
-    // dst.at<cv::Vec3b>(y,x)[1] = uchar(mean[1]);
-    // dst.at<cv::Vec3b>(y,x)[2] = uchar(mean[2]);
-    // return;
+
 
     float covariance_mat[3][3] = {
         0., 0., 0.,
         0., 0., 0.,
         0., 0., 0.
     };
-    // printf("%ld\n", sizeof(covariance_mat[0][0]));
     // for all combinations of rgb
     for (int n2=0; n2<3; n2++)
         for (int n1=0; n1<3; n1++)
@@ -102,15 +97,7 @@ void denoising(const cv::Mat& src, cv::Mat& dst, int rows, int cols, int neighbo
                 }
             covariance_mat[n2][n1] /= N;
         }
-    // dst.at<cv::Vec3b>(y,x)[0] = uchar(covariance_mat[0][0]);
-    // dst.at<cv::Vec3b>(y,x)[1] = uchar(covariance_mat[0][0]);
-    // dst.at<cv::Vec3b>(y,x)[2] = uchar(covariance_mat[0][0]);
-    // return;
     
-    // cout << covariance_mat[1][2] << endl;
-    // cout << covariance_mat[0][0] << ' ' << covariance_mat[0][1] << ' ' << covariance_mat[0][2] << endl;
-    // cout << covariance_mat[1][0] << ' ' << covariance_mat[1][1] << ' ' << covariance_mat[1][2] << endl;
-    // cout << covariance_mat[2][0] << ' ' << covariance_mat[2][1] << ' ' << covariance_mat[2][2] << endl << endl;
 
     float determinant = 0.;
     for (int n=0; n<3; n++)
@@ -120,19 +107,17 @@ void denoising(const cv::Mat& src, cv::Mat& dst, int rows, int cols, int neighbo
         );
     }
     determinant = log10(abs(determinant)+1);
-    // cout << determinant << endl;
-    // av += determinant / (rows * cols);
-    // cout << av;
+
 
     int kernel_size = MAX_KERNEL / (pow(determinant, gamma) + 1.);
     kernel_size = max(1, kernel_size); // kernel size must be at least 1
-    // dst.at<cv::Vec3b>(y,x)[0] = uchar(0);
-    // dst.at<cv::Vec3b>(y,x)[1] = uchar(kernel_size * 15);
-    // dst.at<cv::Vec3b>(y,x)[2] = uchar(0);
-    // return;
+    if (mode == 1) { // visualize kernel size map
+        dst.at<cv::Vec3b>(y,x)[0] = uchar(0);
+        dst.at<cv::Vec3b>(y,x)[1] = uchar(kernel_size * 15);
+        dst.at<cv::Vec3b>(y,x)[2] = uchar(0);
+        return;
+    }
 
-    // kernel_size = max(1, kernel_size); // kernel size must be > 0
-    // cout << kernel_size << endl;
 
     gaussian_filtering(src, dst, rows, cols, kernel_size, x, y);
 }
@@ -149,6 +134,7 @@ int main(int argc, char** argv)
 
     int neighbour = std::stoi(argv[3]);
     float gamma = std::stof(argv[4]);
+    int mode = std::stoi(argv[5]); // 0 -> visualize gaussian filtered image, 1 -> visualize kernel size map
 
     auto begin = chrono::high_resolution_clock::now();
     const int iter = std::stoi(argv[1]);
@@ -159,7 +145,7 @@ int main(int argc, char** argv)
             for (int j=0; j<h_result.rows; j++)
                 for (int i=0; i<h_result.cols; i++)
                 {
-                    denoising(h_img, h_result, h_result.rows, h_result.cols, neighbour, gamma, i, j);
+                    denoising(h_img, h_result, h_result.rows, h_result.cols, neighbour, gamma, i, j, mode);
                 }
     }
     auto end = std::chrono::high_resolution_clock::now();

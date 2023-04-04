@@ -14,13 +14,10 @@
 #define SIGMA 1.5
 #define PI 3.1415
 
-__global__ void process(const cv::cuda::PtrStep<uchar3> src, cv::cuda::PtrStep<uchar3> dst, int rows, int cols, int neighbour, float gamma)
+__global__ void process(const cv::cuda::PtrStep<uchar3> src, cv::cuda::PtrStep<uchar3> dst, int rows, int cols, int neighbour, float gamma, int mode)
 {
     const int dst_x = blockDim.x * blockIdx.x + threadIdx.x;
     const int dst_y = blockDim.y * blockIdx.y + threadIdx.y;
-
-
-
 
 
     int N = neighbour * neighbour;
@@ -48,22 +45,16 @@ __global__ void process(const cv::cuda::PtrStep<uchar3> src, cv::cuda::PtrStep<u
                     case 2: col = src(coord.y, coord.x).z; break;
                 }
                 mean[n] += col;
-                // mean[n] += src(coord.y, coord.x)[n];
             }
         mean[n] /= N;
     }
-    // printf("%f %f %f\n", mean[0], mean[1], mean[2]);
-    // dst(dst_y, dst_x).x = uchar(mean[0]);
-    // dst(dst_y, dst_x).y = uchar(mean[1]);
-    // dst(dst_y, dst_x).z = uchar(mean[2]);    
-    // return;
+
 
     float covariance_mat[3][3] = {
         0., 0., 0.,
         0., 0., 0.,
         0., 0., 0.
     };
-    // printf("%ld\n", sizeof(covariance_mat[0][0]));
     // for all combinations of rgb
     for (int n2=0; n2<3; n2++)
         for (int n1=0; n1<3; n1++)
@@ -98,14 +89,6 @@ __global__ void process(const cv::cuda::PtrStep<uchar3> src, cv::cuda::PtrStep<u
             covariance_mat[n2][n1] /= N;
         }
     
-    // dst(dst_y, dst_x).x = uchar(covariance_mat[0][0]);
-    // dst(dst_y, dst_x).y = uchar(covariance_mat[0][0]);
-    // dst(dst_y, dst_x).z = uchar(covariance_mat[0][0]);
-    // return;
-    
-    // printf("%f %f %f\n", covariance_mat[0][0], covariance_mat[0][1], covariance_mat[0][2]);
-    // printf("%f %f %f\n", covariance_mat[1][0], covariance_mat[1][1], covariance_mat[1][2]);
-    // printf("%f %f %f\n\n", covariance_mat[2][0], covariance_mat[2][1], covariance_mat[2][2]);
 
     float determinant = 0.;
     for (int n=0; n<3; n++)
@@ -115,20 +98,17 @@ __global__ void process(const cv::cuda::PtrStep<uchar3> src, cv::cuda::PtrStep<u
         );
     }
     determinant = log10(abs(determinant)+1);
-    // printf("%f\n", determinant);
-
-
-    // printf("%f\n", determinant);
 
 
     int kernel_size = MAX_KERNEL / float(pow(determinant, gamma) + 1.);
     kernel_size = max(1, kernel_size); // kernel size must be at least 1
-    // dst(dst_y, dst_x).x = uchar(0);
-    // dst(dst_y, dst_x).y = uchar(kernel_size * 15);
-    // dst(dst_y, dst_x).z = uchar(0);
-    // return;
+    if (mode == 1) { // visualize kernel size map
+        dst(dst_y, dst_x).x = uchar(0);
+        dst(dst_y, dst_x).y = uchar(kernel_size * 15);
+        dst(dst_y, dst_x).z = uchar(0);
+        return;
+    }
 
-    // printf("%d\n", kernel_size);
 
     float3 rgb_sum = {0, 0, 0};
     float gauss_sum = 0;
@@ -162,10 +142,10 @@ int divUp(int a, int b)
     return ((a % b) != 0) ? (a / b + 1) : (a / b);
 }
 
-void startCUDA(cv::cuda::GpuMat& src, cv::cuda::GpuMat& dst, int neighbour, float gamma)
+void startCUDA(cv::cuda::GpuMat& src, cv::cuda::GpuMat& dst, int neighbour, float gamma, int mode)
 {
     const dim3 block(32, 8);
     const dim3 grid(divUp(dst.cols, block.x), divUp(dst.rows, block.y));
 
-    process<<<grid, block>>>(src, dst, dst.rows, dst.cols, neighbour, gamma);
+    process<<<grid, block>>>(src, dst, dst.rows, dst.cols, neighbour, gamma, mode);
 }
