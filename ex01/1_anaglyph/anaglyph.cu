@@ -10,7 +10,8 @@
 #include "helper_math.h"
 
 
-__global__ void process(const cv::cuda::PtrStep<uchar3> src, cv::cuda::PtrStep<uchar3> dst, int rows, int cols, float* mat_l, float* mat_r)
+__global__ void process(const cv::cuda::PtrStep<uchar3> src, cv::cuda::PtrStep<uchar3> dst,
+                        int cols, float* mat_l, float* mat_r)
 {
     const int dst_x = blockDim.x * blockIdx.x + threadIdx.x;
     const int dst_y = blockDim.y * blockIdx.y + threadIdx.y;
@@ -47,7 +48,7 @@ void startCUDA(cv::cuda::GpuMat& src, cv::cuda::GpuMat& dst, float* mat_l, float
     cudaMemcpy(dmat_l, mat_l, mat_size, cudaMemcpyHostToDevice);
     cudaMemcpy(dmat_r, mat_r, mat_size, cudaMemcpyHostToDevice);
 
-    process<<<grid, block>>>(src, dst, dst.rows, dst.cols, dmat_l, dmat_r);
+    process<<<grid, block>>>(src, dst, dst.cols, dmat_l, dmat_r);
 
     cudaFree(dmat_l);
     cudaFree(dmat_r);

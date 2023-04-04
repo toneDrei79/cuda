@@ -2,111 +2,30 @@
 #include <opencv2/opencv.hpp>
 #include <chrono>  // for high_resolution_clock
 
+#include "calc_covariance.h"
+#include "gaussian_filtering.h"
+
 
 #define MAX_KERNEL 15
 #define SIGMA 1.5
-#define PI 3.1415
 
 using namespace std;
 
-float av = 0.0;
-
-void gaussian_filtering(const cv::Mat& src, cv::Mat& dst, int rows, int cols, int kernel_size, int x, int y)
+void denoising(const cv::Mat& src, cv::Mat& dst,
+               int rows, int cols,
+               int neighbour, float gamma, int mode,
+               int x, int y)
 {
-    float r_sum = 0;
-    float g_sum = 0;
-    float b_sum = 0;
-    float gauss_sum = 0;
-    // for each kernel pixel
-    for (int j=-kernel_size/2; j<kernel_size/2+kernel_size%2; j++)
-        for (int i=-kernel_size/2; i<kernel_size/2+kernel_size%2; i++)
-        {
-            // get probability from gaussian equation
-            float gauss_val = (1./(2.*PI*pow(SIGMA, 2.))) * exp(-(pow(i,2.)+pow(j,2.))/(2.*pow(SIGMA,2.)));
-            gauss_sum += gauss_val;
-
-            int idx_x = x + i;
-            int idx_y = y + j;
-            // if idx is out of edge
-            if (idx_x < 0) idx_x = 0;
-            if (idx_y < 0) idx_y = 0;
-            if (idx_x >= cols) idx_x = cols - 1;
-            if (idx_y >= rows) idx_y = rows - 1;
-
-            r_sum += gauss_val * src.at<cv::Vec3b>(idx_y, idx_x)[2];
-            g_sum += gauss_val * src.at<cv::Vec3b>(idx_y, idx_x)[1];
-            b_sum += gauss_val * src.at<cv::Vec3b>(idx_y, idx_x)[0];
-        }
-    
-    dst.at<cv::Vec3b>(y,x)[2] = uchar(r_sum / gauss_sum);
-    dst.at<cv::Vec3b>(y,x)[1] = uchar(g_sum / gauss_sum);
-    dst.at<cv::Vec3b>(y,x)[0] = uchar(b_sum / gauss_sum);
-}
-
-void denoising(const cv::Mat& src, cv::Mat& dst, int rows, int cols, int neighbour, float gamma, int x, int y, int mode)
-{
-    int N = neighbour * neighbour;
-
-    float mean[3] = {0., 0., 0.};
-    // for rgb
-    for (int n=0; n<3; n++)
-    {
-        // for all neighbours
-        for (int j=-neighbour/2; j<neighbour/2+neighbour%2; j++)
-            for (int i=-neighbour/2; i<neighbour/2+neighbour%2; i++)
-            {
-                int idx_x = x + i;
-                int idx_y = y + j;
-                // if idx is out of edge
-                if (idx_x < 0) idx_x = 0;
-                if (idx_y < 0) idx_y = 0;
-                if (idx_x >= cols) idx_x = cols - 1;
-                if (idx_y >= rows) idx_y = rows - 1;
-                mean[n] += src.at<cv::Vec3b>(idx_y, idx_x)[n];
-                int a = src.at<cv::Vec3b>(idx_y, idx_x)[n];
-                // cout << a << endl;
-            }
-        mean[n] /= N;
-    }
-
-
     float covariance_mat[3][3] = {
         0., 0., 0.,
         0., 0., 0.,
         0., 0., 0.
     };
-    // for all combinations of rgb
-    for (int n2=0; n2<3; n2++)
-        for (int n1=0; n1<3; n1++)
-        {
-            // for all neighbours
-            for (int j=-neighbour/2; j<neighbour/2+neighbour%2; j++)
-                for (int i=-neighbour/2; i<neighbour/2+neighbour%2; i++)
-                {
-                    int idx_x = x + i;
-                    int idx_y = y + j;
-                    // if idx is out of edge
-                    if (idx_x < 0) idx_x = 0;
-                    if (idx_y < 0) idx_y = 0;
-                    if (idx_x >= cols) idx_x = cols - 1;
-                    if (idx_y >= rows) idx_y = rows - 1;
-                    covariance_mat[n2][n1] += (src.at<cv::Vec3b>(idx_y, idx_x)[n1]-mean[n1]) * (src.at<cv::Vec3b>(idx_y, idx_x)[n2]-mean[n2]);
-                    int a = src.at<cv::Vec3b>(idx_y, idx_x)[n1];
-                    int b = src.at<cv::Vec3b>(idx_y, idx_x)[n2];
-                    // cout << a << ", " << b << endl;
-                }
-            covariance_mat[n2][n1] /= N;
-        }
+    calc_covariance_mat_rgb(src, rows, cols, x, y, neighbour, covariance_mat);
     
-
     float determinant = 0.;
-    for (int n=0; n<3; n++)
-    {
-        determinant += covariance_mat[0][n] * (
-            covariance_mat[1][(n+1)%3]*covariance_mat[2][(n+2)%3] - covariance_mat[1][(n+2)%3]*covariance_mat[2][(n+1)%3]
-        );
-    }
-    determinant = log10(abs(determinant)+1);
+    determinant = calc_determinant(covariance_mat);
+    determinant = log10(abs(determinant)+1); // take absolute, then convert into log10 scale
 
 
     int kernel_size = MAX_KERNEL / (pow(determinant, gamma) + 1.);
@@ -118,8 +37,7 @@ void denoising(const cv::Mat& src, cv::Mat& dst, int rows, int cols, int neighbo
         return;
     }
 
-
-    gaussian_filtering(src, dst, rows, cols, kernel_size, x, y);
+    gaussian_filtering(src, dst, rows, cols, kernel_size, SIGMA, x, y);
 }
 
 int main(int argc, char** argv)
@@ -140,12 +58,12 @@ int main(int argc, char** argv)
     const int iter = std::stoi(argv[1]);
     for (int i=0; i<iter ;i++)
     {
-        // #pragma omp parallel for
+        #pragma omp parallel for
             // for each pixel
             for (int j=0; j<h_result.rows; j++)
                 for (int i=0; i<h_result.cols; i++)
                 {
-                    denoising(h_img, h_result, h_result.rows, h_result.cols, neighbour, gamma, i, j, mode);
+                    denoising(h_img, h_result, h_result.rows, h_result.cols, neighbour, gamma, mode, i, j);
                 }
     }
     auto end = std::chrono::high_resolution_clock::now();

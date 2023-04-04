@@ -7,7 +7,9 @@
 
 using namespace std;
 
-void anaglyph(const cv::Mat& src, cv::Mat& dst, int cols, float mat_l[3][3], float mat_r[3][3], int x, int y)
+void anaglyph(const cv::Mat& src, cv::Mat& dst,
+              int cols, float mat_l[3][3], float mat_r[3][3],
+              int x, int y)
 {
     uchar lr = src.at<cv::Vec3b>(y,x)[2];
     uchar lg = src.at<cv::Vec3b>(y,x)[1];

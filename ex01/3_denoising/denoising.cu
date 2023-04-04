@@ -14,7 +14,9 @@
 #define SIGMA 1.5
 #define PI 3.1415
 
-__global__ void process(const cv::cuda::PtrStep<uchar3> src, cv::cuda::PtrStep<uchar3> dst, int rows, int cols, int neighbour, float gamma, int mode)
+__global__ void process(const cv::cuda::PtrStep<uchar3> src, cv::cuda::PtrStep<uchar3> dst,
+                        int rows, int cols,
+                        int neighbour, float gamma, int mode)
 {
     const int dst_x = blockDim.x * blockIdx.x + threadIdx.x;
     const int dst_y = blockDim.y * blockIdx.y + threadIdx.y;
