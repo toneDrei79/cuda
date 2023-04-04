@@ -72,6 +72,7 @@ __global__ void process(const cv::cuda::PtrStep<uchar3> src, cv::cuda::PtrStep<u
     __syncthreads();
 
 
+    // gaussian filtering
     float3 rgb_sum = {0, 0, 0};
     float gauss_sum = 0;
     // for each kernel pixel
@@ -108,8 +109,6 @@ void startCUDA(cv::cuda::GpuMat& src, cv::cuda::GpuMat& dst, int kernel_size, in
 {
     const dim3 block(32, 8); // blockDim.x, blockDim.y
     const dim3 grid(divUp(dst.cols, block.x), divUp(dst.rows, block.y));
-
-    printf("%d %d\n", dst.cols, dst.rows);
 
     // calculate size of shared memory
     const int radius = kernel_size / 2;

@@ -5,4 +5,5 @@
 # arg3: anaglyph mode (0:true, 1:gray, 2:color, 3:halfcolor, 4:optimized)
 
 /usr/local/cuda/bin/nvcc anaglyph.cu -w `pkg-config opencv4 --cflags --libs` cu01_1.cpp anaglyph_mats.cpp -o apps/anaglyph_cuda
-./apps/anaglyph_cuda $1 $2 $3
+# ./apps/anaglyph_cuda $1 $2 $3
+./apps/anaglyph_cuda 1000 images/stereo03.jpg 2
