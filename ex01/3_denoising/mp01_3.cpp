@@ -13,7 +13,7 @@ using namespace std;
 
 void denoising(const cv::Mat& src, cv::Mat& dst,
                int rows, int cols,
-               int neighbour, float gamma, int mode,
+               int neighbour, float max_kernel, float gamma, int mode,
                int x, int y)
 {
     float covariance_mat[3][3] = {
@@ -28,11 +28,11 @@ void denoising(const cv::Mat& src, cv::Mat& dst,
     determinant = log10(abs(determinant)+1); // take absolute, then convert into log10 scale
 
 
-    int kernel_size = MAX_KERNEL / (pow(determinant, gamma) + 1.);
+    int kernel_size = max_kernel / (pow(determinant, gamma) + 1.);
     kernel_size = max(1, kernel_size); // kernel size must be at least 1
     if (mode == 1) { // visualize kernel size map
         dst.at<cv::Vec3b>(y,x)[0] = uchar(0);
-        dst.at<cv::Vec3b>(y,x)[1] = uchar(kernel_size * 15);
+        dst.at<cv::Vec3b>(y,x)[1] = uchar(kernel_size * 255/max_kernel);
         dst.at<cv::Vec3b>(y,x)[2] = uchar(0);
         return;
     }
@@ -51,8 +51,9 @@ int main(int argc, char** argv)
     cv::imshow("Original Image", h_img);
 
     int neighbour = std::stoi(argv[3]);
-    float gamma = std::stof(argv[4]);
-    int mode = std::stoi(argv[5]); // 0 -> visualize gaussian filtered image, 1 -> visualize kernel size map
+    float max_kernel = std::stof(argv[4]);
+    float gamma = std::stof(argv[5]);
+    int mode = std::stoi(argv[6]); // 0 -> visualize gaussian filtered image, 1 -> visualize kernel size map
 
     auto begin = chrono::high_resolution_clock::now();
     const int iter = std::stoi(argv[1]);
@@ -63,7 +64,7 @@ int main(int argc, char** argv)
             for (int j=0; j<h_result.rows; j++)
                 for (int i=0; i<h_result.cols; i++)
                 {
-                    denoising(h_img, h_result, h_result.rows, h_result.cols, neighbour, gamma, mode, i, j);
+                    denoising(h_img, h_result, h_result.rows, h_result.cols, neighbour, max_kernel, gamma, mode, i, j);
                 }
     }
     auto end = std::chrono::high_resolution_clock::now();

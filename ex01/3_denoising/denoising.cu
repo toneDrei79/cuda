@@ -137,7 +137,7 @@ __device__ float calc_determinant(const float mat[3][3])
 
 __global__ void process(const cv::cuda::PtrStep<uchar3> src, cv::cuda::PtrStep<uchar3> dst,
                         int rows, int cols,
-                        int neighbour, float gamma, int mode)
+                        int neighbour, float max_kernel, float gamma, int mode)
 {
     const int dst_x = blockDim.x * blockIdx.x + threadIdx.x;
     const int dst_y = blockDim.y * blockIdx.y + threadIdx.y;
@@ -154,11 +154,11 @@ __global__ void process(const cv::cuda::PtrStep<uchar3> src, cv::cuda::PtrStep<u
     determinant = log10(abs(determinant)+1); // take absolute, then convert into log10 scale
 
 
-    int kernel_size = MAX_KERNEL / float(pow(determinant, gamma) + 1.);
+    int kernel_size = max_kernel / float(pow(determinant, gamma) + 1.);
     kernel_size = max(1, kernel_size); // kernel size must be at least 1
     if (mode == 1) { // visualize kernel size map
         dst(dst_y, dst_x).x = uchar(0);
-        dst(dst_y, dst_x).y = uchar(kernel_size * 15);
+        dst(dst_y, dst_x).y = uchar(kernel_size * 255/max_kernel);
         dst(dst_y, dst_x).z = uchar(0);
         return;
     }
@@ -171,10 +171,10 @@ int divUp(int a, int b)
     return ((a % b) != 0) ? (a / b + 1) : (a / b);
 }
 
-void startCUDA(cv::cuda::GpuMat& src, cv::cuda::GpuMat& dst, int neighbour, float gamma, int mode)
+void startCUDA(cv::cuda::GpuMat& src, cv::cuda::GpuMat& dst, int neighbour, float max_kernel, float gamma, int mode)
 {
     const dim3 block(32, 8);
     const dim3 grid(divUp(dst.cols, block.x), divUp(dst.rows, block.y));
 
-    process<<<grid, block>>>(src, dst, dst.rows, dst.cols, neighbour, gamma, mode);
+    process<<<grid, block>>>(src, dst, dst.rows, dst.cols, neighbour, max_kernel, gamma, mode);
 }

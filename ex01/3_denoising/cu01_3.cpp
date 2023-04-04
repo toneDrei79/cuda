@@ -6,7 +6,7 @@
 
 using namespace std;
 
-void startCUDA(cv::cuda::GpuMat& src, cv::cuda::GpuMat& dst, int kernel_size, float gamma, int mode);
+void startCUDA(cv::cuda::GpuMat& src, cv::cuda::GpuMat& dst, int kernel_size, float max_kernel, float gamma, int mode);
 
 int main(int argc, char** argv)
 {
@@ -24,14 +24,15 @@ int main(int argc, char** argv)
     cv::imshow("Original Image", h_img);
 
     int neighbour_size = std::stoi(argv[3]);
-    float gamma = std::stof(argv[4]);
-    int mode = std::stoi(argv[5]); // 0 -> visualize gaussian filtered image, 1 -> visualize kernel size map
+    float max_kernel = std::stof(argv[4]);
+    float gamma = std::stof(argv[5]);
+    int mode = std::stoi(argv[6]); // 0 -> visualize gaussian filtered image, 1 -> visualize kernel size map
 
     auto begin = chrono::high_resolution_clock::now();
     const int iter = std::stoi(argv[1]);
     for (int i=0; i<iter ;i++)
     {
-        startCUDA(d_img, d_result, neighbour_size, gamma, mode);
+        startCUDA(d_img, d_result, neighbour_size, max_kernel, gamma, mode);
     }
     auto end = std::chrono::high_resolution_clock::now();
     std::chrono::duration<double> diff = end - begin;
