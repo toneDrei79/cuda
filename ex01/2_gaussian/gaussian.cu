@@ -61,7 +61,7 @@ int divUp(int a, int b)
 
 void startCUDA(cv::cuda::GpuMat& src, cv::cuda::GpuMat& dst, int kernel_size, int sigma)
 {
-    const dim3 block(32, 8);
+    const dim3 block(16,16);
     const dim3 grid(divUp(dst.cols, block.x), divUp(dst.rows, block.y));
 
     process<<<grid, block>>>(src, dst, dst.rows, dst.cols, kernel_size, sigma);

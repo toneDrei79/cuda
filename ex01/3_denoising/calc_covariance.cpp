@@ -37,7 +37,7 @@ void calc_covariance_mat_rgb(const cv::Mat& src,
 {
     float mean[3] = {0., 0., 0.};
     calc_mean_rgb(src, rows, cols, x, y, neighbour, mean);
-    
+
     // for all combinations of rgb
     for (int n2=0; n2<3; n2++)
         for (int n1=0; n1<3; n1++)

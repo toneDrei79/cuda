@@ -107,7 +107,7 @@ int divUp(int a, int b)
 
 void startCUDA(cv::cuda::GpuMat& src, cv::cuda::GpuMat& dst, int kernel_size, int sigma)
 {
-    const dim3 block(32, 8); // blockDim.x, blockDim.y
+    const dim3 block(16,16); // blockDim.x, blockDim.y
     const dim3 grid(divUp(dst.cols, block.x), divUp(dst.rows, block.y));
 
     // calculate size of shared memory

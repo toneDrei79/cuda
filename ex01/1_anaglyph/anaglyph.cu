@@ -33,7 +33,7 @@ int divUp(int a, int b)
 // receive matrices as 1-dim pointer
 void startCUDA(cv::cuda::GpuMat& src, cv::cuda::GpuMat& dst, float* mat_l, float* mat_r)
 {
-    const dim3 block(32, 8);
+    const dim3 block(16,16);
     const dim3 grid(divUp(dst.cols, block.x), divUp(dst.rows, block.y));
 
     // matrices on device

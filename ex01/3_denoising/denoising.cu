@@ -10,7 +10,7 @@
 #include "helper_math.h"
 
 
-#define SIGMA 1.5
+#define SIGMA 2.5
 #define PI 3.1415
 
 __device__ void gaussian_filtering(const cv::cuda::PtrStep<uchar3> src, cv::cuda::PtrStep<uchar3> dst,
@@ -172,7 +172,7 @@ int divUp(int a, int b)
 
 void startCUDA(cv::cuda::GpuMat& src, cv::cuda::GpuMat& dst, int neighbour, float max_kernel, float gamma, int mode)
 {
-    const dim3 block(32, 8);
+    const dim3 block(16,16);
     const dim3 grid(divUp(dst.cols, block.x), divUp(dst.rows, block.y));
 
     process<<<grid, block>>>(src, dst, dst.rows, dst.cols, neighbour, max_kernel, gamma, mode);

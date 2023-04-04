@@ -19,9 +19,7 @@ int main(int argc, char** argv)
     cv::Mat h_result(h_img.rows, h_img.cols/2, CV_8UC3);
 
     cv::cuda::GpuMat d_img, d_result;
-
     d_img.upload(h_img);
-    d_result.upload(h_result);
 
     cv::imshow("Original Image", h_img);
 
@@ -35,12 +33,13 @@ int main(int argc, char** argv)
     const int iter = std::stoi(argv[1]);
     for (int i=0; i<iter ;i++)
     {
+        d_result.upload(h_result);
         startCUDA(d_img, d_result, &mat_l[0][0], &mat_r[0][0]); // send the address of the first element of matrices
+        d_result.download(h_result);
     }
     auto end = std::chrono::high_resolution_clock::now();
     std::chrono::duration<double> diff = end - begin;
 
-    d_result.download(h_result);
     cv::imshow("Processed Image", h_result);
 
     cout << "Time: "<< diff.count() << endl;

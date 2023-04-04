@@ -8,4 +8,4 @@
 
 /usr/local/cuda/bin/nvcc denoising.cu -w `pkg-config opencv4 --cflags --libs` cu01_3.cpp -o apps/denoising_cuda
 # ./apps/denoising_cuda $1 $2 $3 $4 $5 $6
-./apps/denoising_cuda 10 images/butterfly.jpg 9 15 1. 0
+./apps/denoising_cuda 100 images/butterfly.jpg 9 15 1. 0

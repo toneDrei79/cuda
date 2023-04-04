@@ -6,7 +6,7 @@
 #include "gaussian_filtering.h"
 
 
-#define SIGMA 1.5
+#define SIGMA 2.5
 
 using namespace std;
 
@@ -29,7 +29,8 @@ void denoising(const cv::Mat& src, cv::Mat& dst,
 
     int kernel_size = max_kernel / (pow(determinant, gamma) + 1.);
     kernel_size = max(1, kernel_size); // kernel size must be at least 1
-    if (mode == 1) { // visualize kernel size map
+    if (mode == 1) // visualize kernel size map
+    {
         dst.at<cv::Vec3b>(y,x)[0] = uchar(0);
         dst.at<cv::Vec3b>(y,x)[1] = uchar(kernel_size * 255/max_kernel);
         dst.at<cv::Vec3b>(y,x)[2] = uchar(0);

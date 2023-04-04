@@ -12,4 +12,4 @@ g++ -c -o objs/calc_covariance.o -fopenmp `pkg-config opencv4 --cflags --libs` c
 g++ -c -o objs/gaussain_filtering.o -fopenmp `pkg-config opencv4 --cflags --libs` gaussian_filtering.cpp
 g++ objs/mp01_3.o objs/calc_covariance.o objs/gaussain_filtering.o -fopenmp `pkg-config opencv4 --libs` -lstdc++ -o apps/denoising_mp
 # ./apps/denoising_mp $1 $2 $3 $4 $5 $6
-./apps/denoising_mp 10 images/butterfly.jpg 9 15 1. 0
+./apps/denoising_mp 100 images/butterfly.jpg 9 15 1. 0
